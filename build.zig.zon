@@ -45,7 +45,11 @@
         //},
         .zlm = .{
             .url = "https://github.com/ziglibs/zlm/archive/833031bfdbfd24526e4115a59459f9c360d7b824.tar.gz",
-            .hash = "12205dbec9f917a3ab61ca65900dce7a04c9ec4348d0e2241a9c246b9c2d131d061b"
+            .hash = "12205dbec9f917a3ab61ca65900dce7a04c9ec4348d0e2241a9c246b9c2d131d061b",
+        },
+        .zgl = .{
+            .url = "https://github.com/ziglibs/zgl/archive/41eeec2869e58b6d00e376de28271e65f82e48e4.tar.gz",
+            .hash = "1220724f36394bc0d2327b11ceb5124a6c8be23cc3fd73b230c1ebd46a910b8911da",
         },
     },
 
