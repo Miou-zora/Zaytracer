@@ -1,0 +1,3 @@
+[submodule "thirdlib/zlm"]
+	path = thirdlib/zlm
+	url = https://github.com/ziglibs/zlm.git
