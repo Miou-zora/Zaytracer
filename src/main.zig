@@ -1,9 +1,31 @@
 const std = @import("std");
 const zlm = @import("zlm");
 
-pub fn main() void {
-    std.debug.print("Hello World!", .{});
-    const a = zlm.vec3(2, 1, 3);
+const Frame = struct {
+    height: f32,
+    width: f32,
+    pixels: []u8,
 
-    std.debug.print("{d}", .{a.x});
+    pub fn init(height: f32, width: f32, allocator: *const std.mem.Allocator) !Frame {
+        var self: Frame = undefined;
+
+        self.height = height;
+        self.width = width;
+        self.pixels = try allocator.alloc(u8, @as(usize, @intFromFloat(height * width * 4)));
+
+        return self;
+    }
+
+    pub fn free(self: *Frame, allocator: *const std.mem.Allocator) void {
+        allocator.free(self.pixels);
+    }
+};
+
+pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+	const allocator = gpa.allocator();
+
+
+    var frame = try Frame.init(10, 10, &allocator);
+    defer frame.free(&allocator);
 }
