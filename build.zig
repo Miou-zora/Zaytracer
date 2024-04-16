@@ -40,9 +40,6 @@ pub fn build(b: *std.Build) void {
     const zlm = b.dependency("zlm", .{});
     exe.root_module.addImport("zlm", zlm.module("zlm"));
 
-    const zgl = b.dependency("zgl", .{});
-    exe.root_module.addImport("zgl", zgl.module("zgl"));
-
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
