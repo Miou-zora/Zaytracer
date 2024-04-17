@@ -1,22 +1,4 @@
-# IMPORTANT NOTE: THIS IS NOT THE GOOD README
-
-## Coding with codespace
-Create a codespace with current configuration
-
-Execute `mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" | tee ~/.config/nix/nix.conf`
-
-Execute `eval "$(direnv hook bash)"` for bash or you can find you're hook command [here](https://direnv.net/docs/hook.html)
-
-Execute `direnv allow`
-
-# Nix Flake for Zig + Raylib
-
-This repository is a Nix flake for building Zig projects with Raylib. It is currently based on the `master` branch of Zig with the [Zig-overlay](https://github.com/mitchellh/zig-overlay). It use the `raylib` package from the Nixpkgs repository.
-
-This repository is meant to be used as a template for Zig projects that use Raylib. It provides a `flake.nix` file that create a development environment with Zig and Raylib. It also provides a `build.zig` file that can be used to build the project.
-
-> [!NOTE]
-> It's a direct raylib binding from C to Zig. It's not a wrapper around the C library.
+# Zaytracer (Raytracer in zig)
 
 ## :bookmark_tabs: <samp>Requirements</samp>
 
@@ -33,23 +15,16 @@ This repository is meant to be used as a template for Zig projects that use Rayl
 
 Clone this repository and run `nix develop` to enter the development environment
 ```shell
-git clone https://github.com/Miou-zora/Raylib-Zig-Nix.git
-cd Raylib-Zig-Nix
+git clone https://github.com/Miou-zora/Zaytracer.git
+cd Zaytracer
 nix develop
 ```
-
-> [!WARNING]
-> Don't forget to remove the `.git` folder if you want to use this repository for a project.
->
-> Rename every `Zaytracer` in the project by the name of your project.
-
 
 ### :construction_worker: <samp>Building</samp>
 
 ```shell
 zig build
 ```
-
 
 ### :rocket: <samp>Running</samp>
 
@@ -58,11 +33,8 @@ zig build
 # It will build the project and run it. (do nothing if the project is already built)
 zig build run
 # or you can run the executable directly
-./zig-out/bin/[Zaytracer]
+./zig-out/bin/zaytracer
 ```
-
-> [!NOTE]
-> `nix build` is not supported yet. If you try to use it, it will create a `result` symlink that contain the executable BUT musl isn't linked correctly to binary. It would be appreciated if someone could help me to fix this issue.
 
 ### :heavy_plus_sign: <samp>Using direnv</samp>
 
@@ -73,3 +45,15 @@ shell integration.
 echo "use flake" | tee .envrc
 direnv allow
 ```
+
+## Coding with codespace
+
+If you want to works on the project using codespace, follow these instructions:
+
+<kbd>I.</kbd> Create a codespace with current configuration
+
+<kbd>II.</kbd> Execute `mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" | tee ~/.config/nix/nix.conf`
+
+<kbd>III.</kbd> Execute `eval "$(direnv hook bash)"` for bash or you can find you're hook command [here](https://direnv.net/docs/hook.html)
+
+<kbd>IV.</kbd> Execute `direnv allow`
