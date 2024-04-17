@@ -66,18 +66,36 @@ const Vec3 = struct {
 
 const Pt3 = Vec3;
 
-const Sphere = struct {
-    const Self = @This();
-
-    center: Pt3,
-    radius: f32,
-};
-
 const Ray = struct {
     const Self = @This();
 
     origin: Pt3,
     direction: Vec3,
+};
+
+const Sphere = struct {
+    const Self = @This();
+
+    center: Pt3,
+    radius: f32,
+
+    pub fn hits(self: *const Self, ray: Ray) bool {
+        const a: f32 =
+            std.math.pow(f32, ray.direction.x, 2) +
+            std.math.pow(f32, ray.direction.y, 2) +
+            std.math.pow(f32, ray.direction.z, 2);
+        const b: f32 =
+        2 * (ray.direction.x * (ray.origin.x - self.center.x) +
+             ray.direction.y * (ray.origin.y - self.center.y) +
+             ray.direction.z * (ray.origin.z - self.center.z));
+        const c: f32 =
+            std.math.pow(f32, (ray.origin.x - self.center.x), 2) +
+            std.math.pow(f32, (ray.origin.y - self.center.y), 2) +
+            std.math.pow(f32, (ray.origin.z - self.center.z), 2) -
+            std.math.pow(f32, self.radius, 2);
+        const delta: f32 = std.math.pow(f32, b, 2) - 4 * a * c;
+        return !(delta < 0);
+    }
 };
 
 const Rect3 = struct {
@@ -96,7 +114,6 @@ const Camera = struct {
     const Self = @This();
 
     origin: Pt3,
-    direction: Vec3,
     screen: Rect3,
 
     pub fn createRayFromAngles(self: *const Self, u: f32, v: f32) Ray {
@@ -108,21 +125,43 @@ const Camera = struct {
 };
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
-
-    var frame = try Frame.init(100, 100, &allocator);
-    defer frame.deinit();
-
     const cam = Camera{
         .origin = Vec3.nil(),
         .screen = .{
-            .origin = Vec3.nil(),
-            .left = Vec3.nil(),
-            .bottom = Vec3.nil(),
+            .origin = .{
+                .x = -0.5,
+                .y = 1,
+                .z = -0.5,
+            },
+            .left = .{
+                .x = 1,
+                .y = 0,
+                .z = 0,
+            },
+            .bottom = .{
+                .x = 0,
+                .y = 0,
+                .z = 1,
+            },
         },
-        .direction = Vec3.nil(),
     };
-    const some_ray = cam.createRayFromAngles(0, 0);
-    std.debug.print("{}\n", .{some_ray});
+    const sphere = Sphere{ .center = .{ .x = 0, .y = 2, .z = 0 }, .radius = 0.5 };
+    const max_y = 100;
+    const max_x = 100;
+    var out = std.io.getStdOut().writer();
+    try out.print("P3\n", .{});
+    try out.print("{d} {d}\n", .{ max_x, max_y });
+    try out.print("255\n", .{});
+    for (0..max_y) |y| {
+        for (0..max_x) |x| {
+            const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(max_x));
+            const scaled_y: f32 = @as(f32, @floatFromInt(y)) / @as(f32, @floatFromInt(max_y));
+            const ray = cam.createRayFromAngles(scaled_x, scaled_y);
+            if (sphere.hits(ray)) {
+                try out.print("255 0 0\n", .{});
+            } else {
+                try out.print("255 255 255\n", .{});
+            }
+        }
+    }
 }
