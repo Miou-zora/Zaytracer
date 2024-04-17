@@ -43,10 +43,6 @@
         //    // actually used.
         //    .lazy = false,
         //},
-        .zlm = .{
-            .url = "https://github.com/ziglibs/zlm/archive/833031bfdbfd24526e4115a59459f9c360d7b824.tar.gz",
-            .hash = "12205dbec9f917a3ab61ca65900dce7a04c9ec4348d0e2241a9c246b9c2d131d061b",
-        },
     },
 
     // Specifies the set of files and directories that are included in this package.
