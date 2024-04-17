@@ -2,6 +2,6 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
     "ghcr.io/devcontainers/features/nix:1": {},
-    "ghcr.io/devcontainers-contrib/features/direnv:1": {}
+    "ghcr.io/christophermacgown/devcontainer-features/direnv:1": {}
   }
 }
