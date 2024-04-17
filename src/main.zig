@@ -23,8 +23,7 @@ const Frame = struct {
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-	const allocator = gpa.allocator();
-
+    const allocator = gpa.allocator();
 
     var frame = try Frame.init(10, 10, &allocator);
     defer frame.free(&allocator);
