@@ -1,5 +1,14 @@
 # IMPORTANT NOTE: THIS IS NOT THE GOOD README
 
+## Coding with codespace
+Create a codespace with current configuration
+
+Execute `mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" | tee ~/.config/nix/nix.conf`
+
+Execute `eval "$(direnv hook bash)"` for bash or you can find you're hook command [here](https://direnv.net/docs/hook.html)
+
+Execute `direnv allow`
+
 # Nix Flake for Zig + Raylib
 
 This repository is a Nix flake for building Zig projects with Raylib. It is currently based on the `master` branch of Zig with the [Zig-overlay](https://github.com/mitchellh/zig-overlay). It use the `raylib` package from the Nixpkgs repository.
