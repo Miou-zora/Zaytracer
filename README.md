@@ -54,6 +54,6 @@ If you want to works on the project using codespace, follow these instructions:
 
 <kbd>II.</kbd> Execute `mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" | tee ~/.config/nix/nix.conf`
 
-<kbd>III.</kbd> Execute `eval "$(direnv hook bash)"` for bash or you can find you're hook command [here](https://direnv.net/docs/hook.html)
+<kbd>III.</kbd> Execute `eval "$(direnv hook bash)"` for bash or you can find your hook command [here](https://direnv.net/docs/hook.html)
 
 <kbd>IV.</kbd> Execute `direnv allow`
