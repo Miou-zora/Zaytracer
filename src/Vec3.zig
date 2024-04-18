@@ -9,7 +9,7 @@ pub const Vec3 = struct {
         return Vec3{
             .x = self.x - other.x,
             .y = self.y - other.y,
-            .z = self.z - other.y,
+            .z = self.z - other.z,
         };
     }
 
@@ -37,3 +37,25 @@ pub const Vec3 = struct {
         };
     }
 };
+
+test "subVec3" {
+    const std = @import("std");
+
+    const test_vec3 = Vec3{ .x = 5, .y = 4, .z = -3 };
+    try std.testing.expectEqual(Vec3{ .x = 3, .y = 7, .z = 1 }, test_vec3.subVec3(Vec3{ .x = 2, .y = -3, .z = -4 }));
+}
+
+test "addVec3" {
+    const std = @import("std");
+
+    const test_vec3 = Vec3{ .x = 5, .y = 4, .z = -3 };
+    try std.testing.expectEqual(Vec3{ .x = 3, .y = 7, .z = 1 }, test_vec3.addVec3(Vec3{ .x = -2, .y = 3, .z = 4 }));
+}
+
+test "mulVec3" {
+    const std = @import("std");
+
+    const test_vec3 = Vec3{ .x = 5, .y = 4, .z = -3 };
+    try std.testing.expectEqual(Vec3{ .x = 35, .y = 28, .z = -21 }, test_vec3.mulf32(7));
+}
+

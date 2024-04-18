@@ -26,3 +26,46 @@ pub const Sphere = struct {
         return !(delta < 0);
     }
 };
+
+test "hit" {
+    const sphere = Sphere{
+        .center = Pt3{.x = 0, .y = 0, .z = 0},
+        .radius = 1,
+    };
+    const ray = Ray{
+        .origin = Pt3{.x = 0, .y = 0, .z = 0},
+        .direction = Pt3{.x = 0, .y = 0, .z = 1},
+    };
+
+    const hit = sphere.hits(ray);
+    try std.testing.expect(hit);
+}
+
+test "dontHit" {
+    const sphere = Sphere{
+        .center = Pt3{.x = 100, .y = 100, .z = 100},
+        .radius = 1,
+    };
+    const ray = Ray{
+        .origin = Pt3{.x = 0, .y = 0, .z = 0},
+        .direction = Pt3{.x = 0, .y = 0, .z = -1},
+    };
+
+    const hit = sphere.hits(ray);
+    try std.testing.expect(!hit);
+}
+
+
+test "limit" {
+    const sphere = Sphere{
+        .center = Pt3{.x = 0, .y = 0, .z = 0},
+        .radius = 1,
+    };
+    const ray = Ray{
+        .origin = Pt3{.x = 0, .y = -1, .z = 0},
+        .direction = Pt3{.x = 0, .y = 0, .z = 1},
+    };
+
+    const hit = sphere.hits(ray);
+    try std.testing.expect(hit);
+}
