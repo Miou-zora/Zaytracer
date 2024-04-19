@@ -26,9 +26,10 @@ pub fn main() !void {
         },
     };
     const sphere = Sphere{ .center = .{ .x = 0, .y = 0, .z = 2 }, .radius = 0.5 };
-    const max_y = 10;
-    const max_x = 10;
-    var out = std.io.getStdOut().writer();
+    const max_y = 100;
+    const max_x = 100;
+    var buffered_out = std.io.bufferedWriter(std.io.getStdOut().writer());
+    var out = buffered_out.writer();
     try out.print("P3\n", .{});
     try out.print("{d} {d}\n", .{ max_x, max_y });
     try out.print("255\n", .{});
@@ -44,6 +45,7 @@ pub fn main() !void {
             }
         }
     }
+    try buffered_out.flush();
 }
 
 test {
