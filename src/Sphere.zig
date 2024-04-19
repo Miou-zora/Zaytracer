@@ -1,6 +1,8 @@
 const Pt3 = @import("Pt3.zig").Pt3;
 const Ray = @import("Ray.zig").Ray;
 const std = @import("std");
+const HitRecord = @import("HitRecord.zig").HitRecord;
+const Vec3 = @import("Vec3.zig").Vec3;
 
 pub const Sphere = struct {
     const Self = @This();
@@ -8,7 +10,7 @@ pub const Sphere = struct {
     center: Pt3,
     radius: f32,
 
-    pub fn hits(self: *const Self, ray: Ray) bool {
+    pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const a: f32 =
             std.math.pow(f32, ray.direction.x, 2) +
             std.math.pow(f32, ray.direction.y, 2) +
@@ -23,7 +25,32 @@ pub const Sphere = struct {
             std.math.pow(f32, (ray.origin.z - self.center.z), 2) -
             std.math.pow(f32, self.radius, 2);
         const delta: f32 = std.math.pow(f32, b, 2) - 4 * a * c;
-        return !(delta < 0);
+        if (delta < 0) {
+            return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+        } else if (delta == 0) {
+            const t = -b / (2 * a);
+            const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
+            const distance = ray.origin.distance(intersection_point);
+            if (distance < 0) {
+                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            } else {
+                return HitRecord{ .hit = true, .normal = self.center.subVec3(intersection_point), .intersection_point = intersection_point };
+            }
+        } else {
+            const t1 = (-b + std.math.sqrt(delta)) / (2 * a);
+            const t2 = (-b - std.math.sqrt(delta)) / (2 * a);
+            if (t1 < 0 and t2 < 0) {
+                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            }
+            const t = if (std.math.absInt(t1) < std.math.absInt(t2)) t1 else t2;
+            const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
+            const distance = ray.origin.distance(intersection_point);
+            if (distance < 0) {
+                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            } else {
+                return HitRecord{ .hit = true, .normal = self.center.subVec3(intersection_point), .intersection_point = intersection_point };
+            }
+        }
     }
 };
 

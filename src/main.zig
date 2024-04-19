@@ -5,6 +5,19 @@ const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const qoi = @import("qoi.zig");
 
+const ColorRGB = struct {
+    red: f16,
+    green: f16,
+    blue: f16,
+};
+
+const Pt3 = @import("Pt3.zig");
+const Light = struct {
+    intensity: u8,
+    color: ColorRGB,
+    position: Pt3,
+};
+
 pub fn main() !void {
     const camera = Camera{
         .origin = Vec3.nil(),
@@ -26,9 +39,18 @@ pub fn main() !void {
             },
         },
     };
-    const sphere = Sphere{ .center = .{ .x = 0, .y = 0, .z = 2 }, .radius = 0.5 };
-    const height = 1000;
-    const width = 1000;
+    const sphere = Sphere{
+        .center = .{ .x = 0, .y = 0, .z = 2 },
+        .radius = 0.5,
+    };
+    const light = Light{
+        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .intensity = 1,
+        .position = .{ .x = 2, .y = 0, .z = 2 },
+    };
+    const ambiant_color_intensity = 0.1;
+    const height = 1080;
+    const width = 1920;
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
@@ -47,13 +69,19 @@ pub fn main() !void {
             const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
             const scaled_y: f32 = @as(f32, @floatFromInt(y)) / @as(f32, @floatFromInt(height));
             const ray: Ray = camera.createRay(scaled_x, scaled_y);
-            if (sphere.hits(ray)) {
-                image.pixels[index] = .{
-                    .r = 255,
-                    .g = 0,
-                    .b = 0,
-                    .a = 255,
-                };
+            const record = sphere.hits(ray);
+            if (record.hit) {
+                const obstacle = sphere.hits(Ray{ .direction = record.intersection_point.to(sphere.center), .origin = record.intersection_point });
+                if (obstacle.hit) {
+                    image.pixels[index] = .{
+                        .r = 255 * ambiant_color_intensity,
+                        .g = 0,
+                        .b = 0,
+                        .a = 255,
+                    };
+                } else {
+                    
+                }
             } else {
                 image.pixels[index] = .{
                     .r = 255,

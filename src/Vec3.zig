@@ -38,6 +38,21 @@ pub const Vec3 = struct {
             .z = 0,
         };
     }
+
+    pub fn distance(self: *const Self, other: Self) f32 {
+        return std.math.sqrt(std.math.pow(f32, self.x - other.x, 2) + std.math.pow(f32, self.y - other.y, 2) + std.math.pow(f32, self.z - other.z, 2));
+    }
+
+    pub fn to(self: *const Self, other: Self) Vec3 {
+        return other.subVec3(self);
+    }
+    // static Maths::Vector GetReflectedRay(const Maths::Vector &normal,
+    //             const Maths::Vector &incident)
+    //         {
+    //             return (((normal * incident) * normal) * 2 - incident);
+    //         }
+
+    pub fn 
 };
 
 test "subVec3" {
