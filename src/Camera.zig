@@ -1,6 +1,7 @@
 const Pt3 = @import("Pt3.zig").Pt3;
 const Rect3 = @import("Rect3.zig").Rect3;
 const Ray = @import("Ray.zig").Ray;
+const std = @import("std");
 
 pub const Camera = struct {
     const Self = @This();
@@ -17,7 +18,6 @@ pub const Camera = struct {
 };
 
 test "casual" {
-    const std = @import("std");
     const camera = Camera{
         .origin = Pt3.nil(),
         .screen = .{
@@ -41,4 +41,8 @@ test "casual" {
     try std.testing.expectEqual(camera.createRay(0.5, 0.5), Ray{ .direction = .{ .x = 0, .y = 1, .z = 0 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
     try std.testing.expectEqual(camera.createRay(1, 1), Ray{ .direction = .{ .x = 0.5, .y = 1, .z = 0.5 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
     try std.testing.expectEqual(camera.createRay(0, 0), Ray{ .direction = .{ .x = -0.5, .y = 1, .z = -0.5 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
+}
+
+test {
+    std.testing.refAllDecls(@This());
 }
