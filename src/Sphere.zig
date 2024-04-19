@@ -11,10 +11,7 @@ pub const Sphere = struct {
     radius: f32,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const a: f32 =
-            std.math.pow(f32, ray.direction.x, 2) +
-            std.math.pow(f32, ray.direction.y, 2) +
-            std.math.pow(f32, ray.direction.z, 2);
+        const a: f32 = ray.direction.dot(ray.direction);
         const b: f32 =
             2 * (ray.direction.x * (ray.origin.x - self.center.x) +
             ray.direction.y * (ray.origin.y - self.center.y) +
@@ -60,12 +57,18 @@ test "hit" {
         .radius = 1,
     };
     const ray = Ray{
-        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
-        .direction = Pt3{ .x = 0, .y = 0, .z = 1 },
+        .origin = Pt3{ .x = 0, .y = 0, .z = 2 },
+        .direction = Pt3{ .x = 0, .y = 0, .z = -1 },
     };
 
     const hit = sphere.hits(ray);
-    try std.testing.expect(hit);
+    try std.testing.expect(hit.hit);
+    try std.testing.expect(hit.intersection_point.x == 0);
+    try std.testing.expect(hit.intersection_point.y == 0);
+    try std.testing.expect(hit.intersection_point.z == 1);
+    try std.testing.expect(hit.normal.x == 0);
+    try std.testing.expect(hit.normal.y == 0);
+    try std.testing.expect(hit.normal.z == 1);
 }
 
 test "dontHit" {
@@ -79,7 +82,7 @@ test "dontHit" {
     };
 
     const hit = sphere.hits(ray);
-    try std.testing.expect(!hit);
+    try std.testing.expect(!hit.hit);
 }
 
 test "limit" {
@@ -88,12 +91,18 @@ test "limit" {
         .radius = 1,
     };
     const ray = Ray{
-        .origin = Pt3{ .x = 0, .y = -1, .z = 0 },
+        .origin = Pt3{ .x = 0, .y = -1, .z = -1 },
         .direction = Pt3{ .x = 0, .y = 0, .z = 1 },
     };
 
     const hit = sphere.hits(ray);
-    try std.testing.expect(hit);
+    try std.testing.expect(hit.hit);
+    try std.testing.expect(hit.intersection_point.x == 0);
+    try std.testing.expect(hit.intersection_point.y == -1);
+    try std.testing.expect(hit.intersection_point.z == 0);
+    try std.testing.expect(hit.normal.x == 0);
+    try std.testing.expect(hit.normal.y == -1);
+    try std.testing.expect(hit.normal.z == 0);
 }
 
 test {
