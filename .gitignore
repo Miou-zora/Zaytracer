@@ -9,3 +9,4 @@ zig-out/
 # Output
 out.ppm
 output.ppm
+out.qoi
