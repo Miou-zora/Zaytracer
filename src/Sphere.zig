@@ -34,7 +34,7 @@ pub const Sphere = struct {
             if (distance < 0) {
                 return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
             } else {
-                return HitRecord{ .hit = true, .normal = self.center.subVec3(intersection_point), .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point };
             }
         } else {
             const t1 = (-b + std.math.sqrt(delta)) / (2 * a);
@@ -42,13 +42,13 @@ pub const Sphere = struct {
             if (t1 < 0 and t2 < 0) {
                 return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
             }
-            const t = if (std.math.absInt(t1) < std.math.absInt(t2)) t1 else t2;
+            const t = if (@fabs(t1) < @fabs(t2)) t1 else t2;
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
             const distance = ray.origin.distance(intersection_point);
             if (distance < 0) {
                 return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
             } else {
-                return HitRecord{ .hit = true, .normal = self.center.subVec3(intersection_point), .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point };
             }
         }
     }

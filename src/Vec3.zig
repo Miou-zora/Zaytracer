@@ -44,15 +44,20 @@ pub const Vec3 = struct {
     }
 
     pub fn to(self: *const Self, other: Self) Vec3 {
-        return other.subVec3(self);
+        return other.subVec3(self.*);
     }
-    // static Maths::Vector GetReflectedRay(const Maths::Vector &normal,
-    //             const Maths::Vector &incident)
-    //         {
-    //             return (((normal * incident) * normal) * 2 - incident);
-    //         }
 
-    pub fn 
+    pub fn angleBetween(self: *const Self, other: Self) f32 {
+        return std.math.acos(self.dot(other) / (self.length() * other.length()));
+    }
+
+    pub fn length(self: *const Self) f32 {
+        return std.math.sqrt(std.math.pow(f32, self.x, 2) + std.math.pow(f32, self.y, 2) + std.math.pow(f32, self.z, 2));
+    }
+
+    pub fn dot(self: *const Self, other: Self) f32 {
+        return self.x * other.x + self.y * other.y + self.z * other.z;
+    }
 };
 
 test "subVec3" {
