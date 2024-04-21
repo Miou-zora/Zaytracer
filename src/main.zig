@@ -4,6 +4,7 @@ const Ray = @import("Ray.zig").Ray;
 const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const qoi = @import("qoi.zig");
+const Light = @import("Light.zig").Light;
 
 pub fn main() !void {
     const camera = Camera{
@@ -26,7 +27,16 @@ pub fn main() !void {
             },
         },
     };
-    const sphere = Sphere{ .center = .{ .x = 0, .y = 0, .z = 2 }, .radius = 0.5 };
+    const sphere = Sphere{
+        .center = .{ .x = 0, .y = 0, .z = 2 },
+        .radius = 0.5,
+    };
+    const light = Light{
+        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .intensity = 1,
+        .position = .{ .x = 2, .y = 3, .z = 2 },
+    };
+    const ambiant_color_intensity = 0.1;
     const height = 1000;
     const width = 1000;
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -45,20 +55,34 @@ pub fn main() !void {
     for (0..height) |y| {
         for (0..width) |x| {
             const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
-            const scaled_y: f32 = @as(f32, @floatFromInt(y)) / @as(f32, @floatFromInt(height));
+            const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
             const ray: Ray = camera.createRay(scaled_x, scaled_y);
-            if (sphere.hits(ray)) {
-                image.pixels[index] = .{
-                    .r = 255,
-                    .g = 0,
-                    .b = 0,
-                    .a = 255,
-                };
+            var record = sphere.hits(ray);
+            record.intersection_point.x = record.intersection_point.x + record.normal.x * 0.001;
+            record.intersection_point.y = record.intersection_point.y + record.normal.y * 0.001;
+            record.intersection_point.z = record.intersection_point.z + record.normal.z * 0.001;
+            if (record.hit) {
+                const obstacle = sphere.hits(Ray{ .direction = record.intersection_point.to(light.position), .origin = record.intersection_point });
+                if (obstacle.hit) {
+                    image.pixels[index] = .{
+                        .r = @as(u8, @intFromFloat(255.0 * ambiant_color_intensity)),
+                        .g = 0,
+                        .b = 0,
+                        .a = 255,
+                    };
+                } else {
+                    image.pixels[index] = .{
+                        .r = 255,
+                        .g = 0,
+                        .b = 0,
+                        .a = 255,
+                    };
+                }
             } else {
                 image.pixels[index] = .{
-                    .r = 255,
-                    .g = 255,
-                    .b = 255,
+                    .r = 0,
+                    .g = 0,
+                    .b = 0,
                     .a = 255,
                 };
             }

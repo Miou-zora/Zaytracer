@@ -9,10 +9,10 @@ pub const Camera = struct {
     origin: Pt3,
     screen: Rect3,
 
-    pub fn createRay(self: *const Self, u: f32, v: f32) Ray {
+    pub fn createRay(self: *const Self, x: f32, y: f32) Ray {
         return Ray{
             .origin = self.origin,
-            .direction = self.screen.pointAt(u, v).subVec3(self.origin),
+            .direction = self.screen.pointAt(x, y).subVec3(self.origin),
         };
     }
 };

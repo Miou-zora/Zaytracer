@@ -38,6 +38,26 @@ pub const Vec3 = struct {
             .z = 0,
         };
     }
+
+    pub fn distance(self: *const Self, other: Self) f32 {
+        return std.math.sqrt(std.math.pow(f32, self.x - other.x, 2) + std.math.pow(f32, self.y - other.y, 2) + std.math.pow(f32, self.z - other.z, 2));
+    }
+
+    pub fn to(self: *const Self, other: Self) Vec3 {
+        return other.subVec3(self.*);
+    }
+
+    pub fn angleBetween(self: *const Self, other: Self) f32 {
+        return std.math.acos(self.dot(other) / (self.length() * other.length()));
+    }
+
+    pub fn length(self: *const Self) f32 {
+        return std.math.sqrt(std.math.pow(f32, self.x, 2) + std.math.pow(f32, self.y, 2) + std.math.pow(f32, self.z, 2));
+    }
+
+    pub fn dot(self: *const Self, other: Self) f32 {
+        return self.x * other.x + self.y * other.y + self.z * other.z;
+    }
 };
 
 test "subVec3" {
