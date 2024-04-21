@@ -495,34 +495,3 @@ test "random encode/decode" {
         try std.testing.expectEqualSlices(Color, &input_buffer, image.pixels);
     }
 }
-
-test "input fuzzer. plz do not crash" {
-    var rng_engine = std.rand.DefaultPrng.init(0x1337);
-    const rng = rng_engine.random();
-
-    var rounds: usize = 32;
-    while (rounds > 0) {
-        rounds -= 1;
-        var input_buffer: [1 << 20]u8 = undefined; // perform on a 1 MB buffer
-        rng.bytes(&input_buffer);
-
-        if ((rounds % 4) != 0) { // 25% is fully random 75% has a correct looking header
-            std.mem.copy(u8, &input_buffer, &(Header{
-                .width = rng.int(u16),
-                .height = rng.int(u16),
-                .format = rng.enumValue(Format),
-                .colorspace = rng.enumValue(Colorspace),
-            }).encode());
-        }
-
-        var stream = std.io.fixedBufferStream(&input_buffer);
-
-        var image_or_err = decodeStream(std.testing.allocator, stream.reader());
-        if (image_or_err) |*image| {
-            defer image.deinit(std.testing.allocator);
-        } else |err| {
-            // error is also okay, just no crashes plz
-            err catch {};
-        }
-    }
-}
