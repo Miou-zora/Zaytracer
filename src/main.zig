@@ -10,8 +10,6 @@ const Light = @import("Light.zig").Light;
 fn compute_lighting(intersection: Vec3, normal: Vec3, light: Pt3, ambient: f32) f32 {
     const L = intersection.to(light);
     const n_dot_l = normal.dot(L);
-    if (n_dot_l <= 0)
-        return ambient;
     // TODO: Check if adding the ambient is not just better
     return std.math.clamp(1.0 * n_dot_l / (normal.length() * L.length()), ambient, 1.0);
 }
