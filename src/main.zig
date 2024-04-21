@@ -1,10 +1,20 @@
 const std = @import("std");
 const Vec3 = @import("Vec3.zig").Vec3;
+const Pt3 = @import("Pt3.zig").Pt3;
 const Ray = @import("Ray.zig").Ray;
 const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const qoi = @import("qoi.zig");
 const Light = @import("Light.zig").Light;
+
+fn compute_lighting(intersection: Vec3, normal: Vec3, light: Pt3, ambient: f32) f32 {
+    const L = intersection.to(light);
+    const n_dot_l = normal.dot(L);
+    if (n_dot_l <= 0)
+        return ambient;
+    // TODO: Check if adding the ambient is not just better
+    return std.math.clamp(1.0 * n_dot_l / (normal.length() * L.length()), ambient, 1.0);
+}
 
 pub fn main() !void {
     const camera = Camera{
@@ -62,7 +72,8 @@ pub fn main() !void {
             record.intersection_point.y = record.intersection_point.y + record.normal.y * 0.001;
             record.intersection_point.z = record.intersection_point.z + record.normal.z * 0.001;
             if (record.hit) {
-                const obstacle = sphere.hits(Ray{ .direction = record.intersection_point.to(light.position), .origin = record.intersection_point });
+                const vec_to_light = record.intersection_point.to(light.position);
+                const obstacle = sphere.hits(Ray{ .direction = vec_to_light, .origin = record.intersection_point });
                 if (obstacle.hit) {
                     image.pixels[index] = .{
                         .r = @as(u8, @intFromFloat(255.0 * ambiant_color_intensity)),
@@ -71,8 +82,11 @@ pub fn main() !void {
                         .a = 255,
                     };
                 } else {
+                    const norm = record.normal;
+                    const inter = record.intersection_point;
+                    const light_color = 255.0 * compute_lighting(inter, norm, light.position, ambiant_color_intensity);
                     image.pixels[index] = .{
-                        .r = 255,
+                        .r = @as(u8, @intFromFloat(light_color)),
                         .g = 0,
                         .b = 0,
                         .a = 255,
