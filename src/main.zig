@@ -9,6 +9,7 @@ const Light = @import("Light.zig").Light;
 pub const Plane = @import("Plane.zig").Plane;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Transformation = @import("Transformation.zig");
+const Cylinder = @import("Cylinder.zig").Cylinder;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, light: Pt3, ambient: f32) f32 {
     const L = intersection.to(light);
@@ -43,11 +44,12 @@ pub fn main() !void {
     //     .radius = 0.5,
     // };
     // const sphere_translation = Transformation.Transformation{ .translation = .{ .x = -0.5, .y = 0.2, .z = 1.5 } };
-    const sphere = Plane{
-        .normal = .{ .x = 0, .y = 1, .z = 0 },
-        .origin = .{ .x = 0, .y = -1, .z = 1 },
-    };
-    const sphere_translation = Transformation.Transformation{ .rotation = .{ .x = 0.3, .y = 0, .z = 0.2 } };
+    // const sphere = Plane{
+    //     .normal = .{ .x = 0, .y = 1, .z = 0 },
+    //     .origin = .{ .x = 0, .y = -1, .z = 1 },
+    // };
+    const sphere = Cylinder{ .radius = 0.5, .origin = Pt3{ .x = 2, .y = 0, .z = 10 } };
+    const sphere_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
         .color = .{ .blue = 255, .green = 255, .red = 255 },
         .intensity = 1,

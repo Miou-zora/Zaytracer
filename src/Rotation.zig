@@ -1,7 +1,7 @@
 const Ray = @import("Ray.zig").Ray;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
-const Plane = @import("Plane.zig").Plane;
+const Cylinder = @import("Cylinder.zig").Cylinder;
 
 pub const Rotation = struct {
     const Self = @This();
@@ -10,7 +10,7 @@ pub const Rotation = struct {
     y: f32,
     z: f32,
 
-    pub fn ray_global_to_object(self: *const Self, ray: Ray, object: Plane) Ray {
+    pub fn ray_global_to_object(self: *const Self, ray: Ray, object: Cylinder) Ray {
         var ray_in_object_space = Ray{
             .direction = ray.direction,
             .origin = ray.origin.subVec3(object.origin),
@@ -27,7 +27,7 @@ pub const Rotation = struct {
         };
     }
 
-    pub fn hitRecord_object_to_global(self: *const Self, hitrecord: HitRecord, object: Plane) HitRecord {
+    pub fn hitRecord_object_to_global(self: *const Self, hitrecord: HitRecord, object: Cylinder) HitRecord {
         var hitrecord_in_object_space = HitRecord{
             .intersection_point = hitrecord.intersection_point.subVec3(object.origin),
             .normal = hitrecord.normal,
