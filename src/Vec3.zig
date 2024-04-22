@@ -70,6 +70,27 @@ pub const Vec3 = struct {
     pub fn dot(self: *const Self, other: Self) f32 {
         return self.x * other.x + self.y * other.y + self.z * other.z;
     }
+
+    pub fn rotateX(self: *Self, angle: f32) void {
+        const y = self.y;
+        const z = self.z;
+        self.y = y * std.math.cos(angle) - z * std.math.sin(angle);
+        self.z = y * std.math.sin(angle) + z * std.math.cos(angle);
+    }
+
+    pub fn rotateY(self: *Self, angle: f32) void {
+        const x = self.x;
+        const z = self.z;
+        self.x = x * std.math.cos(angle) + z * std.math.sin(angle);
+        self.z = -x * std.math.sin(angle) + z * std.math.cos(angle);
+    }
+
+    pub fn rotateZ(self: *Self, angle: f32) void {
+        const x = self.x;
+        const y = self.y;
+        self.x = x * std.math.cos(angle) - y * std.math.sin(angle);
+        self.y = x * std.math.sin(angle) + y * std.math.cos(angle);
+    }
 };
 
 test "subVec3" {
