@@ -6,6 +6,7 @@ const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const qoi = @import("qoi.zig");
 const Light = @import("Light.zig").Light;
+pub const Plane = @import("Plane.zig").Plane;
 
 fn compute_lighting(intersection: Vec3, normal: Vec3, light: Pt3, ambient: f32) f32 {
     const L = intersection.to(light);
