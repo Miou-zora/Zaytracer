@@ -23,14 +23,6 @@ pub const Vec3 = struct {
         };
     }
 
-    pub fn mul(self: *const Self, other: Self) Vec3 {
-        return Vec3{
-            .x = self.y * other.z - self.z * other.y,
-            .y = self.z * other.x - self.x * other.z,
-            .z = self.x * other.y - self.y * other.x,
-        };
-    }
-
     pub fn collapse(self: *const Self) f32 {
         return self.x + self.y + self.z;
     }
