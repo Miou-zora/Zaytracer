@@ -8,7 +8,7 @@ pub const Plane = struct {
     const Self = @This();
 
     normal: Vec3,
-    point: Pt3,
+    origin: Pt3,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const denom = self.normal.dot(ray.direction);
@@ -17,7 +17,7 @@ pub const Plane = struct {
             return HitRecord.nil();
         }
 
-        const t = (self.point.subVec3(ray.origin)).dot(self.normal) / denom;
+        const t = (self.origin.subVec3(ray.origin)).dot(self.normal) / denom;
 
         if (t < 0.0) {
             return HitRecord.nil();
@@ -35,7 +35,7 @@ pub const Plane = struct {
 test "hit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .point = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
     };
 
     const ray = Ray{
@@ -57,7 +57,7 @@ test "hit" {
 test "dontHit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .point = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
     };
 
     const ray = Ray{
@@ -73,7 +73,7 @@ test "dontHit" {
 test "parallel" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .point = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
     };
 
     const ray = Ray{
