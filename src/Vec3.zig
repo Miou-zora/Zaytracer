@@ -23,6 +23,18 @@ pub const Vec3 = struct {
         };
     }
 
+    pub fn collapse(self: *const Self) f32 {
+        return self.x + self.y + self.z;
+    }
+
+    pub fn inv(self: *const Self) Vec3 {
+        return Vec3{
+            .x = -self.x,
+            .y = -self.y,
+            .z = -self.z,
+        };
+    }
+
     pub fn addVec3(self: *const Self, other: Self) Vec3 {
         return Vec3{
             .x = self.x + other.x,
