@@ -18,7 +18,7 @@ pub const Cylinder = struct {
         const c = rx_minus_cx * rx_minus_cx + ry_minus_cy * ry_minus_cy - self.radius * self.radius;
 
         const delta = b * b - 4.0 * a * c;
-        if (delta < 0.0) {
+        if (delta < 0.0 or a == 0.0) {
             return HitRecord.nil();
         } else if (delta == 0) {
             const t = -b / (2.0 * a);
@@ -27,7 +27,7 @@ pub const Cylinder = struct {
             if (distance < 0.0) {
                 return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
             }
         } else {
             const t1 = (-b + std.math.sqrt(delta)) / (2.0 * a);
@@ -44,7 +44,7 @@ pub const Cylinder = struct {
             if (distance < 0.0) {
                 return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
             }
         }
     }

@@ -6,68 +6,98 @@ const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const qoi = @import("qoi.zig");
 const Light = @import("Light.zig").Light;
+const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const Plane = @import("Plane.zig").Plane;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Transformation = @import("Transformation.zig");
 const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
+const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 
-pub fn compute_lighting(intersection: Vec3, normal: Vec3, light: Pt3, ambient: f32) f32 {
-    const L = intersection.to(light);
-    const n_dot_l = normal.dot(L);
-    // TODO: Check if adding the ambient is not just better
-    return std.math.clamp(1.0 * n_dot_l / (normal.length() * L.length()), ambient, 1.0);
+pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene) ColorRGB {
+    var lighting: ColorRGB = ColorRGB{ .red = 0, .green = 0, .blue = 0 };
+    for (scene.lights.items) |light| {
+        switch (light) {
+            .point_light => |item| {
+                const L = intersection.to(item.position);
+                const n_dot_l = normal.dot(L);
+                const em = n_dot_l / (normal.length() * L.length());
+                if (em < 0) {
+                    continue;
+                }
+                lighting.blue += item.color.blue * em * item.intensity;
+                lighting.green += item.color.green * em * item.intensity;
+                lighting.red += item.color.red * em * item.intensity;
+            },
+            .ambient_light => |item| {
+                lighting.blue += item.color.blue * item.intensity;
+                lighting.green += item.color.green * item.intensity;
+                lighting.red += item.color.red * item.intensity;
+            },
+        }
+    }
+    return ColorRGB{
+        .blue = std.math.clamp(lighting.blue, 0.0, 255.0),
+        .green = std.math.clamp(lighting.green, 0.0, 255.0),
+        .red = std.math.clamp(lighting.red, 0.0, 255.0),
+    };
 }
 
-fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) void {
-    var index: usize = 0;
+fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: u32, list_of_hits: []HitRecord) qoi.Color {
+    const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
+    const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
+    const ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
+
+    for (scene.objects.items, 0..) |object, i| {
+        switch (object) {
+            .cylinder => |item| {
+                list_of_hits[i] = item.hits(ray);
+            },
+            .sphere => |item| {
+                list_of_hits[i] = item.hits(ray);
+            },
+            .plane => |item| {
+                list_of_hits[i] = item.hits(ray);
+            },
+        }
+    }
+
+    var closest_hit: HitRecord = HitRecord.nil();
+    for (list_of_hits) |hit| {
+        if (hit.hit and (!closest_hit.hit or hit.t < closest_hit.t)) {
+            closest_hit = hit;
+        }
+    }
+
+    if (closest_hit.hit) {
+        closest_hit.intersection_point.x = closest_hit.intersection_point.x + closest_hit.normal.x * 0.001;
+        closest_hit.intersection_point.y = closest_hit.intersection_point.y + closest_hit.normal.y * 0.001;
+        closest_hit.intersection_point.z = closest_hit.intersection_point.z + closest_hit.normal.z * 0.001;
+        const norm = closest_hit.normal;
+        const inter = closest_hit.intersection_point;
+        const light_color = compute_lighting(inter, norm, scene);
+        return .{
+            .r = @as(u8, @intFromFloat(light_color.red)),
+            .g = @as(u8, @intFromFloat(light_color.green)),
+            .b = @as(u8, @intFromFloat(light_color.blue)),
+            .a = 255,
+        };
+    }
+
+    return .{
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .a = 255,
+    };
+}
+
+fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
+    var list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
+    defer allocator.free(list_of_hits);
     for (0..height) |y| {
         for (0..width) |x| {
-            const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
-            const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
-            const ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
-            const light = scene.lights.items[0].point_light;
-            const cylinder = scene.objects.items[0].cylinder;
-            const ambient_color_intensity = scene.lights.items[1].ambient_light;
-            const cylinder_translation = scene.transforms.items[0];
-            const ray_object = Transformation.ray_global_to_object(ray, cylinder_translation, cylinder);
-            var record = cylinder.hits(ray_object);
-            record = Transformation.hitRecord_object_to_global(record, cylinder_translation, cylinder);
-            record.intersection_point.x = record.intersection_point.x + record.normal.x * 0.001;
-            record.intersection_point.y = record.intersection_point.y + record.normal.y * 0.001;
-            record.intersection_point.z = record.intersection_point.z + record.normal.z * 0.001;
-            if (record.hit) {
-                const vec_to_light = record.intersection_point.to(light.position);
-                const vec_to_light_object = Transformation.ray_global_to_object(Ray{ .direction = vec_to_light, .origin = record.intersection_point }, cylinder_translation, cylinder);
-                var obstacle = cylinder.hits(vec_to_light_object);
-                obstacle = Transformation.hitRecord_object_to_global(obstacle, cylinder_translation, cylinder);
-                if (obstacle.hit) {
-                    pixels[index] = .{
-                        .r = @as(u8, @intFromFloat(255.0 * ambient_color_intensity)),
-                        .g = 0,
-                        .b = 0,
-                        .a = 255,
-                    };
-                } else {
-                    const norm = record.normal;
-                    const inter = record.intersection_point;
-                    const light_color = 255.0 * compute_lighting(inter, norm, light.position, ambient_color_intensity);
-                    pixels[index] = .{
-                        .r = @as(u8, @intFromFloat(light_color)),
-                        .g = 0,
-                        .b = 0,
-                        .a = 255,
-                    };
-                }
-            } else {
-                pixels[index] = .{
-                    .r = 0,
-                    .g = 0,
-                    .b = 0,
-                    .a = 255,
-                };
-            }
-            index += 1;
+            pixels[x + y * width] = get_pixel_color(x, y, scene, height, width, list_of_hits);
         }
     }
 }
@@ -93,23 +123,16 @@ pub fn main() !void {
             },
         },
     };
-    // const sphere = Sphere{
-    //     .center = .{ .x = 0, .y = 0, .z = 2 },
-    //     .radius = 0.5,
-    // };
-    // const sphere_translation = Transformation.Transformation{ .translation = .{ .x = -0.5, .y = 0.2, .z = 1.5 } };
-    // const sphere = Plane{
-    //     .normal = .{ .x = 0, .y = 1, .z = 0 },
-    //     .origin = .{ .x = 0, .y = -1, .z = 1 },
-    // };
-    const cylinder = Cylinder{ .radius = 0.5, .origin = Pt3{ .x = 2, .y = 0, .z = 10 } };
     const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
-        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .color = .{ .blue = 100, .green = 100, .red = 255 },
         .intensity = 1,
         .position = .{ .x = 0, .y = 1, .z = 2 },
     };
-    const ambient_color_intensity = 0.1;
+    const ambiant_light: AmbientLight = .{
+        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .intensity = 0.1,
+    };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
@@ -118,9 +141,27 @@ pub fn main() !void {
     var scene = Scene.Scene.init(allocator, camera);
     defer scene.deinit();
 
-    try scene.objects.append(.{ .cylinder = cylinder });
+    try scene.objects.append(.{ .cylinder = .{ .radius = 0.5, .origin = Pt3{
+        .x = 2,
+        .y = 2,
+        .z = 10,
+    } } });
+    try scene.objects.append(.{ .sphere = .{ .center = Pt3{
+        .x = -0.2,
+        .y = 0,
+        .z = 2,
+    }, .radius = 0.5 } });
+    try scene.objects.append(.{ .plane = .{ .normal = Vec3{
+        .x = 0,
+        .y = 1,
+        .z = 0,
+    }, .origin = Pt3{
+        .x = 0,
+        .y = -1,
+        .z = 1,
+    } } });
     try scene.lights.append(.{ .point_light = light });
-    try scene.lights.append(.{ .ambient_light = ambient_color_intensity });
+    try scene.lights.append(.{ .ambient_light = ambiant_light });
     try scene.transforms.append(cylinder_translation);
 
     const height = 1000;
@@ -134,7 +175,7 @@ pub fn main() !void {
     };
     defer image.deinit(allocator);
 
-    calculate_image(image.pixels, &scene, height, width);
+    try calculate_image(image.pixels, &scene, height, width, allocator);
 
     var file = try std.fs.cwd().createFile("out.qoi", .{});
     defer file.close();
