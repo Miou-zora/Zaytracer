@@ -93,7 +93,7 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
 }
 
 fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
-    var list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
+    const list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
     defer allocator.free(list_of_hits);
     for (0..height) |y| {
         for (0..width) |x| {
