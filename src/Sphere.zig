@@ -27,8 +27,7 @@ pub const Sphere = struct {
         } else if (delta == 0) {
             const t = -b / (2 * a);
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0) {
+            if (t < 0) {
                 return HitRecord.nil();
             } else {
                 return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };
@@ -39,10 +38,9 @@ pub const Sphere = struct {
             if (t1 < 0 and t2 < 0) {
                 return HitRecord.nil();
             }
-            const t = if (@fabs(t1) < @fabs(t2)) t1 else t2;
+            const t = if (t1 < t2 and t1 > 0) t1 else t2;
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0) {
+            if (t < 0) {
                 return HitRecord.nil();
             } else {
                 return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };

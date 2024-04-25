@@ -56,4 +56,8 @@ If you want to works on the project using codespace, follow these instructions:
 
 <kbd>III.</kbd> Execute `eval "$(direnv hook bash)"` for bash or you can find your hook command [here](https://direnv.net/docs/hook.html)
 
-<kbd>IV.</kbd> Execute `direnv allow`
+<kbd>IV.</kbd> Execute:
+```
+echo "use flake" | tee .envrc
+direnv allow
+```

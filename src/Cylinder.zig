@@ -23,8 +23,7 @@ pub const Cylinder = struct {
         } else if (delta == 0) {
             const t = -b / (2.0 * a);
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0.0) {
+            if (t < 0.0) {
                 return HitRecord.nil();
             } else {
                 return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
@@ -35,17 +34,9 @@ pub const Cylinder = struct {
             if (t1 < 0 and t2 < 0) {
                 return HitRecord.nil();
             }
-            const t = if (@fabs(t1) < @fabs(t2)) t1 else t2;
-            if (t < 0.0) {
-                return HitRecord.nil();
-            }
+            const t = if (t1 < t2 and t1 > 0) t1 else t2;
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0.0) {
-                return HitRecord.nil();
-            } else {
-                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
-            }
+            return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
         }
     }
 };
