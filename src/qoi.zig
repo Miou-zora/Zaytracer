@@ -391,8 +391,8 @@ pub const Header = struct {
         if (!std.mem.eql(u8, buffer[0..4], &correct_magic))
             return error.InvalidMagic;
         return Header{
-            .width = std.mem.readIntBig(u32, buffer[4..8]),
-            .height = std.mem.readIntBig(u32, buffer[8..12]),
+            .width = std.mem.readInt(u32, buffer[4..8], .big),
+            .height = std.mem.readInt(u32, buffer[8..12], .big),
             .format = try std.meta.intToEnum(Format, buffer[12]),
             .colorspace = try std.meta.intToEnum(Colorspace, buffer[13]),
         };
