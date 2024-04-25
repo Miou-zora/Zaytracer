@@ -93,7 +93,7 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
 }
 
 fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
-    var list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
+    const list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
     defer allocator.free(list_of_hits);
     for (0..height) |y| {
         for (0..width) |x| {
@@ -164,12 +164,12 @@ pub fn main() !void {
     try scene.lights.append(.{ .ambient_light = ambiant_light });
     try scene.transforms.append(cylinder_translation);
 
-    const height = 1000;
-    const width = 1000;
+    const height: u32 = 1000;
+    const width: u32 = 1000;
 
     var image = qoi.Image{
-        .width = std.math.cast(u32, width) orelse return error.Overflow,
-        .height = std.math.cast(u32, height) orelse return error.Overflow,
+        .width = width,
+        .height = height,
         .colorspace = .sRGB,
         .pixels = try allocator.alloc(qoi.Color, width * height),
     };

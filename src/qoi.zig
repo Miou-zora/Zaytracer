@@ -134,7 +134,7 @@ pub fn encodeBuffer(allocator: std.mem.Allocator, image: ConstImage) (std.mem.Al
 
 /// Encodes a given `image` into a QOI buffer.
 pub fn encodeStream(image: ConstImage, writer: anytype) (EncodeError || @TypeOf(writer).Error)!void {
-    var format = for (image.pixels) |pix| {
+    const format = for (image.pixels) |pix| {
         if (pix.a != 0xFF)
             break Format.rgba;
     } else Format.rgb;
@@ -189,7 +189,7 @@ pub fn Encoder(comptime Writer: type) type {
 
         /// Resets the stream so it will start encoding from a clean slate.
         pub fn reset(self: *Self) void {
-            var writer = self.writer;
+            const writer = self.writer;
             self.* = Self{ .writer = writer };
         }
 
@@ -286,7 +286,7 @@ pub fn Decoder(comptime Reader: type) type {
 
         /// Decodes the next `ColorRun` from the stream. For non-run commands, will return a run with length 1.
         pub fn fetch(self: *Self) (Reader.Error || error{EndOfStream})!ColorRun {
-            var byte = try self.reader.readByte();
+            const byte = try self.reader.readByte();
 
             var new_color = self.current_color;
             var count: usize = 1;
@@ -391,8 +391,8 @@ pub const Header = struct {
         if (!std.mem.eql(u8, buffer[0..4], &correct_magic))
             return error.InvalidMagic;
         return Header{
-            .width = std.mem.readIntBig(u32, buffer[4..8]),
-            .height = std.mem.readIntBig(u32, buffer[8..12]),
+            .width = std.mem.readInt(u32, buffer[4..8], .big),
+            .height = std.mem.readInt(u32, buffer[8..12], .big),
             .format = try std.meta.intToEnum(Format, buffer[12]),
             .colorspace = try std.meta.intToEnum(Colorspace, buffer[13]),
         };
@@ -400,9 +400,9 @@ pub const Header = struct {
 
     fn encode(header: Header) [size]u8 {
         var result: [size]u8 = undefined;
-        std.mem.copy(u8, result[0..4], &correct_magic);
-        std.mem.writeIntBig(u32, result[4..8], header.width);
-        std.mem.writeIntBig(u32, result[8..12], header.height);
+        @memcpy(result[0..4], &correct_magic);
+        std.mem.writeInt(u32, result[4..8], header.width, .big);
+        std.mem.writeInt(u32, result[8..12], header.height, .big);
         result[12] = @intFromEnum(header.format);
         result[13] = @intFromEnum(header.colorspace);
         return result;
@@ -454,7 +454,7 @@ test "decode qoi file" {
 test "encode qoi" {
     const src_data = @embedFile("data/zero.raw");
 
-    var dst_data = try encodeBuffer(std.testing.allocator, ConstImage{
+    const dst_data = try encodeBuffer(std.testing.allocator, ConstImage{
         .width = 512,
         .height = 512,
         .pixels = std.mem.bytesAsSlice(Color, src_data),
@@ -479,7 +479,7 @@ test "random encode/decode" {
         var input_buffer: [width * height]Color = undefined;
         rng.bytes(std.mem.sliceAsBytes(&input_buffer));
 
-        var encoded_data = try encodeBuffer(std.testing.allocator, ConstImage{
+        const encoded_data = try encodeBuffer(std.testing.allocator, ConstImage{
             .width = width,
             .height = height,
             .pixels = &input_buffer,
