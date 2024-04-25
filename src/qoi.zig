@@ -400,7 +400,7 @@ pub const Header = struct {
 
     fn encode(header: Header) [size]u8 {
         var result: [size]u8 = undefined;
-        std.mem.copyBackwards(u8, result[0..4], &correct_magic);
+        @memcpy(result[0..4], &correct_magic);
         std.mem.writeInt(u32, result[4..8], header.width, .big);
         std.mem.writeInt(u32, result[8..12], header.height, .big);
         result[12] = @intFromEnum(header.format);
