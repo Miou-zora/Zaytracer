@@ -28,6 +28,7 @@ pub const Plane = struct {
             .hit = true,
             .intersection_point = hit_point,
             .normal = self.normal,
+            .t = t,
         };
     }
 };

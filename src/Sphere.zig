@@ -23,29 +23,27 @@ pub const Sphere = struct {
             std.math.pow(f32, self.radius, 2);
         const delta: f32 = std.math.pow(f32, b, 2) - 4 * a * c;
         if (delta < 0) {
-            return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            return HitRecord.nil();
         } else if (delta == 0) {
             const t = -b / (2 * a);
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0) {
-                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            if (t < 0) {
+                return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };
             }
         } else {
             const t1 = (-b + std.math.sqrt(delta)) / (2 * a);
             const t2 = (-b - std.math.sqrt(delta)) / (2 * a);
             if (t1 < 0 and t2 < 0) {
-                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+                return HitRecord.nil();
             }
-            const t = if (@fabs(t1) < @fabs(t2)) t1 else t2;
+            const t = if (t1 < t2 and t1 > 0) t1 else t2;
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            const distance = ray.origin.distance(intersection_point);
-            if (distance < 0) {
-                return HitRecord{ .hit = false, .normal = Vec3.nil(), .intersection_point = Vec3.nil() };
+            if (t < 0) {
+                return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point };
+                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };
             }
         }
     }

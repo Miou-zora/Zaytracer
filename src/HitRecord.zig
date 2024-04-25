@@ -7,8 +7,9 @@ pub const HitRecord = struct {
     hit: bool,
     normal: Vec3,
     intersection_point: Pt3,
+    t: f32,
 
     pub fn nil() Self {
-        return Self{ .hit = false, .normal = Vec3.nil(), .intersection_point = Pt3.nil() };
+        return Self{ .hit = false, .normal = Vec3.nil(), .intersection_point = Pt3.nil(), .t = 0 };
     }
 };

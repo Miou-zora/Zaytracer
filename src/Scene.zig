@@ -1,6 +1,7 @@
 const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
 const Light = @import("Light.zig").Light;
+const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const Cylinder = @import("Cylinder.zig").Cylinder;
 const Plane = @import("Plane.zig").Plane;
 const Transformation = @import("Transformation.zig").Transformation;
@@ -14,7 +15,7 @@ pub const SceneObject = union(enum) {
 
 pub const SceneLight = union(enum) {
     point_light: Light,
-    ambient_light: f32, // TODO: Have a properly defined ambient_light type
+    ambient_light: AmbientLight,
 };
 
 pub const Scene = struct {
