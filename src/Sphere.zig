@@ -3,12 +3,14 @@ const Ray = @import("Ray.zig").Ray;
 const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
+const Material = @import("Material.zig").Material;
 
 pub const Sphere = struct {
     const Self = @This();
 
     center: Pt3,
     radius: f32,
+    material: Material,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const a: f32 = ray.direction.dot(ray.direction);
@@ -27,7 +29,13 @@ pub const Sphere = struct {
             if (t < 0) {
                 return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };
+                return HitRecord{
+                    .hit = true,
+                    .normal = intersection_point.subVec3(self.center),
+                    .intersection_point = intersection_point,
+                    .t = t,
+                    .material = self.material,
+                };
             }
         } else {
             const t1 = (-b + @sqrt(delta)) / (2 * a);
@@ -40,7 +48,13 @@ pub const Sphere = struct {
             if (t < 0) {
                 return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = intersection_point.subVec3(self.center), .intersection_point = intersection_point, .t = t };
+                return HitRecord{
+                    .hit = true,
+                    .normal = intersection_point.subVec3(self.center),
+                    .intersection_point = intersection_point,
+                    .t = t,
+                    .material = self.material,
+                };
             }
         }
     }
