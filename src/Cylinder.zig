@@ -56,8 +56,15 @@ pub const Cylinder = struct {
 };
 
 test "hit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 }, .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },
+        .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(hit_record.hit);
     try std.testing.expect(hit_record.intersection_point.x == 0.0);
@@ -69,15 +76,29 @@ test "hit" {
 }
 
 test "dontHit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 }, .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 },
+        .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(!hit_record.hit);
 }
 
 test "limit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 }, .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },
+        .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(hit_record.hit);
     try std.testing.expect(hit_record.intersection_point.x == 0.0);

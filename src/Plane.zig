@@ -40,6 +40,7 @@ test "hit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{
@@ -62,6 +63,7 @@ test "dontHit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{
@@ -78,6 +80,7 @@ test "parallel" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{
