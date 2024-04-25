@@ -83,22 +83,28 @@ pub const Vec3 = struct {
     pub fn rotateX(self: *Self, angle: f32) void {
         const y = self.y;
         const z = self.z;
-        self.y = y * @cos(angle) - z * @sin(angle);
-        self.z = y * @sin(angle) + z * @cos(angle);
+        const cos_angle = @cos(angle);
+        const sin_angle = @sin(angle);
+        self.y = y * cos_angle - z * sin_angle;
+        self.z = y * sin_angle + z * cos_angle;
     }
 
     pub fn rotateY(self: *Self, angle: f32) void {
         const x = self.x;
         const z = self.z;
-        self.x = x * @cos(angle) + z * @sin(angle);
-        self.z = -x * @sin(angle) + z * @cos(angle);
+        const cos_angle = @cos(angle);
+        const sin_angle = @sin(angle);
+        self.x = x * cos_angle + z * sin_angle;
+        self.z = -x * sin_angle + z * cos_angle;
     }
 
     pub fn rotateZ(self: *Self, angle: f32) void {
         const x = self.x;
         const y = self.y;
-        self.x = x * @cos(angle) - y * @sin(angle);
-        self.y = x * @sin(angle) + y * @cos(angle);
+        const cos_angle = @cos(angle);
+        const sin_angle = @sin(angle);
+        self.x = x * cos_angle - y * sin_angle;
+        self.y = x * sin_angle + y * cos_angle;
     }
 
     pub fn sum(self: *const Self) f32 {
