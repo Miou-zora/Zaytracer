@@ -56,7 +56,7 @@ test "hit" {
 
 test "dontHit" {
     const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 }, .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 } };
+    const ray = Ray{ .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 }, .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 } };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(!hit_record.hit);
 }
