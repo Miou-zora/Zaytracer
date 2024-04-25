@@ -61,7 +61,7 @@ pub const Vec3 = struct {
 
     pub fn distance(self: *const Self, other: Self) f32 {
         const self_minus_other = self.subVec3(other);
-        return std.math.sqrt(self_minus_other.mulVec3(self_minus_other).sum());
+        return @sqrt(self_minus_other.mulVec3(self_minus_other).sum());
     }
 
     pub fn to(self: *const Self, other: Self) Vec3 {
@@ -73,7 +73,7 @@ pub const Vec3 = struct {
     }
 
     pub fn length(self: *const Self) f32 {
-        return std.math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
+        return @sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
     }
 
     pub fn dot(self: *const Self, other: Self) f32 {

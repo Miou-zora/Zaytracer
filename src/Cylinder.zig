@@ -29,8 +29,8 @@ pub const Cylinder = struct {
                 return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
             }
         } else {
-            const t1 = (-b + std.math.sqrt(delta)) / (2.0 * a);
-            const t2 = (-b - std.math.sqrt(delta)) / (2.0 * a);
+            const t1 = (-b + @sqrt(delta)) / (2.0 * a);
+            const t2 = (-b - @sqrt(delta)) / (2.0 * a);
             if (t1 < 0 and t2 < 0) {
                 return HitRecord.nil();
             }
