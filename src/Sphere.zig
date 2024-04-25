@@ -16,12 +16,9 @@ pub const Sphere = struct {
             2 * (ray.direction.x * (ray.origin.x - self.center.x) +
             ray.direction.y * (ray.origin.y - self.center.y) +
             ray.direction.z * (ray.origin.z - self.center.z));
-        const c: f32 =
-            std.math.pow(f32, (ray.origin.x - self.center.x), 2) +
-            std.math.pow(f32, (ray.origin.y - self.center.y), 2) +
-            std.math.pow(f32, (ray.origin.z - self.center.z), 2) -
-            std.math.pow(f32, self.radius, 2);
-        const delta: f32 = std.math.pow(f32, b, 2) - 4 * a * c;
+        const ro_minus_center = ray.origin.subVec3(self.center);
+        const c: f32 = ro_minus_center.mulVec3(ro_minus_center).sum() - self.radius * self.radius; // Precalculate r*r
+        const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();
         } else if (delta == 0) {

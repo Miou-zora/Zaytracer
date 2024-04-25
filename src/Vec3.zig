@@ -23,6 +23,14 @@ pub const Vec3 = struct {
         };
     }
 
+    pub fn mulVec3(self: *const Self, other: Self) Vec3 {
+        return Vec3{
+            .x = self.x * other.x,
+            .y = self.y * other.y,
+            .z = self.z * other.z,
+        };
+    }
+
     pub fn collapse(self: *const Self) f32 {
         return self.x + self.y + self.z;
     }
@@ -52,7 +60,8 @@ pub const Vec3 = struct {
     }
 
     pub fn distance(self: *const Self, other: Self) f32 {
-        return std.math.sqrt(std.math.pow(f32, self.x - other.x, 2) + std.math.pow(f32, self.y - other.y, 2) + std.math.pow(f32, self.z - other.z, 2));
+        const self_minus_other = self.subVec3(other);
+        return std.math.sqrt(self_minus_other.mulVec3(self_minus_other).sum());
     }
 
     pub fn to(self: *const Self, other: Self) Vec3 {
@@ -64,7 +73,7 @@ pub const Vec3 = struct {
     }
 
     pub fn length(self: *const Self) f32 {
-        return std.math.sqrt(std.math.pow(f32, self.x, 2) + std.math.pow(f32, self.y, 2) + std.math.pow(f32, self.z, 2));
+        return std.math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
     }
 
     pub fn dot(self: *const Self, other: Self) f32 {
@@ -90,6 +99,10 @@ pub const Vec3 = struct {
         const y = self.y;
         self.x = x * std.math.cos(angle) - y * std.math.sin(angle);
         self.y = x * std.math.sin(angle) + y * std.math.cos(angle);
+    }
+
+    pub fn sum(self: *const Self) f32 {
+        return self.x + self.y + self.z;
     }
 };
 
