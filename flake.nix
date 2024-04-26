@@ -31,7 +31,7 @@
           '';
 
           installPhase = ''
-            ${zigPackage}/bin/zig build install --prefix $out
+            ${zigPackage}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
             rm -rf $out/zig # remove cache
           '';
         };
