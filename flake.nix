@@ -27,7 +27,7 @@
           XDG_CACHE_HOME = "${placeholder "out"}";
 
           buildPhase = ''
-            ${zigPackage}/bin/zig build
+            ${zigPackage}/bin/zig build -Doptimize=ReleaseFast
           '';
 
           installPhase = ''
