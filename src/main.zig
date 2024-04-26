@@ -198,8 +198,8 @@ pub fn main() !void {
     try scene.lights.append(.{ .ambient_light = ambiant_light });
     try scene.transforms.append(cylinder_translation);
 
-    const height: u32 = 1000;
-    const width: u32 = 1000;
+    const height: u32 = 10000;
+    const width: u32 = 10000;
 
     var image = qoi.Image{
         .width = width,

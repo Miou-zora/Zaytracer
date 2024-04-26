@@ -17,6 +17,7 @@
           name = "Zaytracer";
           nativeBuildInputs = [
             zigPackage
+            pkgs.linuxPackages_latest.perf
           ];
         };
         packages.default = pkgs.stdenv.mkDerivation {
