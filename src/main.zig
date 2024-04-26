@@ -13,21 +13,33 @@ const Transformation = @import("Transformation.zig");
 const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
+const Material = @import("Material.zig").Material;
 
-pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene) ColorRGB {
+pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .red = 0, .green = 0, .blue = 0 };
     for (scene.lights.items) |light| {
         switch (light) {
             .point_light => |item| {
-                const L = intersection.to(item.position);
+                const L = intersection.to(item.position).normalized();
                 const n_dot_l = normal.dot(L);
-                const em = n_dot_l / (normal.length() * L.length());
+                const em = n_dot_l / (normal.length() * L.length()) * item.intensity;
                 if (em < 0) {
                     continue;
                 }
-                lighting.blue += item.color.blue * em * item.intensity;
-                lighting.green += item.color.green * em * item.intensity;
-                lighting.red += item.color.red * em * item.intensity;
+                lighting.blue += item.color.blue * em;
+                lighting.green += item.color.green * em;
+                lighting.red += item.color.red * em;
+                if (material.specular != -1) {
+                    const R = normal.mulf32(n_dot_l * 2.0).subVec3(L);
+                    const V = ray.direction.inv().normalized();
+                    const r_dot_v = R.dot(V);
+                    if (r_dot_v > 0) {
+                        const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
+                        lighting.blue += item.color.blue * i;
+                        lighting.green += item.color.green * i;
+                        lighting.red += item.color.red * i;
+                    }
+                }
             },
             .ambient_light => |item| {
                 lighting.blue += item.color.blue * item.intensity;
@@ -73,13 +85,14 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
         closest_hit.intersection_point.x = closest_hit.intersection_point.x + closest_hit.normal.x * 0.001;
         closest_hit.intersection_point.y = closest_hit.intersection_point.y + closest_hit.normal.y * 0.001;
         closest_hit.intersection_point.z = closest_hit.intersection_point.z + closest_hit.normal.z * 0.001;
-        const norm = closest_hit.normal;
+        const norm = closest_hit.normal.normalized();
         const inter = closest_hit.intersection_point;
-        const light_color = compute_lighting(inter, norm, scene);
+        const material = closest_hit.material;
+        const light_color = compute_lighting(inter, norm, scene, ray, material);
         return .{
-            .r = @as(u8, @intFromFloat(light_color.red)),
-            .g = @as(u8, @intFromFloat(light_color.green)),
-            .b = @as(u8, @intFromFloat(light_color.blue)),
+            .r = @as(u8, @intFromFloat(material.color.red * light_color.red / 255)),
+            .g = @as(u8, @intFromFloat(material.color.green * light_color.green / 255)),
+            .b = @as(u8, @intFromFloat(material.color.blue * light_color.blue / 255)),
             .a = 255,
         };
     }
@@ -125,13 +138,13 @@ pub fn main() !void {
     };
     const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
-        .color = .{ .blue = 100, .green = 100, .red = 255 },
-        .intensity = 1,
+        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .intensity = 0.6,
         .position = .{ .x = 0, .y = 1, .z = 2 },
     };
     const ambiant_light: AmbientLight = .{
         .color = .{ .blue = 255, .green = 255, .red = 255 },
-        .intensity = 0.1,
+        .intensity = 0.2,
     };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -141,25 +154,46 @@ pub fn main() !void {
     var scene = Scene.Scene.init(allocator, camera);
     defer scene.deinit();
 
-    try scene.objects.append(.{ .cylinder = .{ .radius = 0.5, .origin = Pt3{
-        .x = 2,
-        .y = 2,
-        .z = 10,
-    } } });
-    try scene.objects.append(.{ .sphere = .{ .center = Pt3{
-        .x = -0.2,
-        .y = 0,
-        .z = 2,
-    }, .radius = 0.5 } });
-    try scene.objects.append(.{ .plane = .{ .normal = Vec3{
-        .x = 0,
-        .y = 1,
-        .z = 0,
-    }, .origin = Pt3{
-        .x = 0,
-        .y = -1,
-        .z = 1,
-    } } });
+    try scene.objects.append(.{ .cylinder = .{
+        .radius = 0.5,
+        .origin = Pt3{
+            .x = 2,
+            .y = 2,
+            .z = 10,
+        },
+        .material = .{
+            .specular = 100,
+            .color = .{ .blue = 255, .green = 0, .red = 0 },
+        },
+    } });
+    try scene.objects.append(.{ .sphere = .{
+        .center = Pt3{
+            .x = -0.2,
+            .y = -0.5,
+            .z = 2,
+        },
+        .radius = 0.5,
+        .material = .{
+            .specular = 100,
+            .color = .{ .blue = 0, .green = 0, .red = 255 },
+        },
+    } });
+    try scene.objects.append(.{ .plane = .{
+        .normal = Vec3{
+            .x = 0,
+            .y = 1,
+            .z = 0,
+        },
+        .origin = Pt3{
+            .x = 0,
+            .y = -1,
+            .z = 1,
+        },
+        .material = .{
+            .specular = 100,
+            .color = .{ .blue = 0, .green = 255, .red = 0 },
+        },
+    } });
     try scene.lights.append(.{ .point_light = light });
     try scene.lights.append(.{ .ambient_light = ambiant_light });
     try scene.transforms.append(cylinder_translation);

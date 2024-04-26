@@ -3,12 +3,14 @@ const Ray = @import("Ray.zig").Ray;
 const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
+const Material = @import("Material.zig").Material;
 
 pub const Cylinder = struct {
     const Self = @This();
 
     radius: f32,
     origin: Pt3,
+    material: Material,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const rx_minus_cx = ray.origin.x - self.origin.x;
@@ -26,7 +28,13 @@ pub const Cylinder = struct {
             if (t < 0.0) {
                 return HitRecord.nil();
             } else {
-                return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
+                return HitRecord{
+                    .hit = true,
+                    .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 },
+                    .intersection_point = intersection_point,
+                    .t = t,
+                    .material = self.material,
+                };
             }
         } else {
             const t1 = (-b + @sqrt(delta)) / (2.0 * a);
@@ -36,14 +44,27 @@ pub const Cylinder = struct {
             }
             const t = if (t1 < t2 and t1 > 0) t1 else t2;
             const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
-            return HitRecord{ .hit = true, .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 }, .intersection_point = intersection_point, .t = t };
+            return HitRecord{
+                .hit = true,
+                .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 },
+                .intersection_point = intersection_point,
+                .t = t,
+                .material = self.material,
+            };
         }
     }
 };
 
 test "hit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 }, .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },
+        .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(hit_record.hit);
     try std.testing.expect(hit_record.intersection_point.x == 0.0);
@@ -55,15 +76,29 @@ test "hit" {
 }
 
 test "dontHit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 }, .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 },
+        .direction = Vec3{ .x = 1.0, .y = 1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(!hit_record.hit);
 }
 
 test "limit" {
-    const cylinder = Cylinder{ .radius = 1.0, .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 } };
-    const ray = Ray{ .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 }, .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 } };
+    const cylinder = Cylinder{
+        .radius = 1.0,
+        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
+    };
+    const ray = Ray{
+        .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },
+        .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
+    };
     const hit_record = cylinder.hits(ray);
     try std.testing.expect(hit_record.hit);
     try std.testing.expect(hit_record.intersection_point.x == 0.0);

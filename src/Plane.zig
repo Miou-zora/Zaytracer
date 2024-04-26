@@ -3,12 +3,14 @@ const Ray = @import("Ray.zig").Ray;
 const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
+const Material = @import("Material.zig").Material;
 
 pub const Plane = struct {
     const Self = @This();
 
     normal: Vec3,
     origin: Pt3,
+    material: Material,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const denom = self.normal.dot(ray.direction);
@@ -29,6 +31,7 @@ pub const Plane = struct {
             .intersection_point = hit_point,
             .normal = self.normal,
             .t = t,
+            .material = self.material,
         };
     }
 };
@@ -37,6 +40,7 @@ test "hit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{
@@ -59,6 +63,7 @@ test "dontHit" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{
@@ -75,6 +80,7 @@ test "parallel" {
     const plane = Plane{
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+        .material = Material.nil(),
     };
 
     const ray = Ray{

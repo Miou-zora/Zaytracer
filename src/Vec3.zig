@@ -23,6 +23,15 @@ pub const Vec3 = struct {
         };
     }
 
+    pub fn normalized(self: *const Self) Vec3 {
+        const vec_length = self.length();
+        return Vec3{
+            .x = self.x / vec_length,
+            .y = self.y / vec_length,
+            .z = self.z / vec_length,
+        };
+    }
+
     pub fn mulVec3(self: *const Self, other: Self) Vec3 {
         return Vec3{
             .x = self.x * other.x,
