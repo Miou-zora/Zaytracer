@@ -61,3 +61,13 @@ If you want to works on the project using codespace, follow these instructions:
 echo "use flake" | tee .envrc
 direnv allow
 ```
+
+## Performance measures
+
+To take performance measures you can use th perf tool like this:
+```sh
+perf record -g ./Zaytracer
+perf report -g 'graph,0.5,caller'
+```
+
+You will need a debug build for that, else you won't have debug symbols.
