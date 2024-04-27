@@ -125,28 +125,9 @@ pub fn main() !void {
     defer config.deinit();
     const config_data = config.value;
     std.debug.print("{}\n", .{config_data});
-    std.debug.print("{s}\n", .{config_data.bruh});
-    std.os.linux.exit(0);
-    const camera = Camera{
-        .origin = Vec3.nil(),
-        .screen = .{
-            .origin = .{
-                .x = -0.5,
-                .y = -0.5,
-                .z = 1,
-            },
-            .left = .{
-                .x = 1,
-                .y = 0,
-                .z = 0,
-            },
-            .top = .{
-                .x = 0,
-                .y = 1,
-                .z = 0,
-            },
-        },
-    };
+    std.debug.print("{}\n", .{config_data.camera});
+    // std.os.linux.exit(0);
+    const camera = config_data.camera;
     const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
         .color = .{ .blue = 255, .green = 255, .red = 255 },
@@ -205,8 +186,8 @@ pub fn main() !void {
     try scene.lights.append(.{ .ambient_light = ambiant_light });
     try scene.transforms.append(cylinder_translation);
 
-    const height: u32 = 10000;
-    const width: u32 = 10000;
+    const height: u32 = 1000;
+    const width: u32 = 1000;
 
     var image = qoi.Image{
         .width = width,

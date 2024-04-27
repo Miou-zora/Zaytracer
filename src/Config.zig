@@ -1,4 +1,5 @@
 const std = @import("std");
+const Camera = @import("Camera.zig").Camera;
 
 pub const Config = struct {
     const Self = @This();
@@ -15,5 +16,5 @@ pub const Config = struct {
         return std.json.parseFromSlice(Self, allocator, data, .{ .allocate = .alloc_always });
     }
 
-    bruh: []const u8,
+    camera: Camera,
 };
