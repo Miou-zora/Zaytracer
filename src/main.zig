@@ -123,7 +123,7 @@ pub fn main() !void {
     const allocator = arena.allocator();
 
     const config = try Config.fromFilePath("config.json", allocator);
-    std.debug.print("{any}\n", .{config.materials});
+    std.debug.print("{any}\n", .{config.objects});
     const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
         .color = .{ .b = 255, .g = 255, .r = 255 },
@@ -138,6 +138,10 @@ pub fn main() !void {
     var scene = Scene.Scene.init(allocator, config.camera);
     defer scene.deinit();
 
+    for (config.objects) |obj| {
+        try scene.objects.append(obj);
+    }
+
     try scene.objects.append(.{ .cylinder = .{
         .radius = 0.5,
         .origin = Pt3{
@@ -148,18 +152,6 @@ pub fn main() !void {
         .material = .{
             .specular = 100,
             .color = .{ .b = 255, .g = 0, .r = 0 },
-        },
-    } });
-    try scene.objects.append(.{ .sphere = .{
-        .center = Pt3{
-            .x = -0.2,
-            .y = -0.5,
-            .z = 2,
-        },
-        .radius = 0.5,
-        .material = .{
-            .specular = 100,
-            .color = .{ .b = 0, .g = 0, .r = 255 },
         },
     } });
     try scene.objects.append(.{ .plane = .{

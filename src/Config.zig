@@ -1,10 +1,23 @@
 const std = @import("std");
 const Camera = @import("Camera.zig").Camera;
 const Material = @import("Material.zig").Material;
+const Pt3 = @import("Pt3.zig").Pt3;
+const Scene = @import("Scene.zig");
+const Sphere = @import("Sphere.zig").Sphere;
+const Object = Scene.SceneObject;
+
+const ObjectProxy = struct {
+    sphere: ?struct {
+        center: Pt3,
+        radius: f32,
+        material: usize,
+    },
+};
 
 const ConfigProxy = struct {
     camera: Camera,
     materials: []Material,
+    objects: []ObjectProxy,
 };
 
 pub const Config = struct {
@@ -23,12 +36,24 @@ pub const Config = struct {
             .allocate = .alloc_always,
             .ignore_unknown_fields = true,
         });
-        return Self{
+        var conf = Self{
             .camera = proxy.camera,
-            .materials = proxy.materials,
+            .objects = try allocator.alloc(Object, proxy.objects.len),
         };
+        for (proxy.objects, 0..) |obj, i| {
+            if (obj.sphere) |item| {
+                conf.objects[i] = Object{ .sphere = .{
+                    .center = item.center,
+                    .radius = item.radius,
+                    .material = proxy.materials[item.material],
+                } };
+            } else {
+                unreachable;
+            }
+        }
+        return conf;
     }
 
     camera: Camera,
-    materials: []Material,
+    objects: []Object,
 };
