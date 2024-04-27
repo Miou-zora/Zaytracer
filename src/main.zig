@@ -14,6 +14,7 @@ const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
+const Config = @import("Config.zig").Config;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .red = 0, .green = 0, .blue = 0 };
@@ -116,6 +117,16 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    const config = try Config.fromFilePath("config.json", allocator);
+    defer config.deinit();
+    const config_data = config.value;
+    std.debug.print("{}\n", .{config_data});
+    std.debug.print("{s}\n", .{config_data.bruh});
+    std.os.linux.exit(0);
     const camera = Camera{
         .origin = Vec3.nil(),
         .screen = .{
@@ -146,10 +157,6 @@ pub fn main() !void {
         .color = .{ .blue = 255, .green = 255, .red = 255 },
         .intensity = 0.2,
     };
-
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
 
     var scene = Scene.Scene.init(allocator, camera);
     defer scene.deinit();
