@@ -1,9 +1,9 @@
 const std = @import("std");
 
 pub const ColorRGB = struct {
-    red: f32,
-    green: f32,
-    blue: f32,
+    r: f32,
+    g: f32,
+    b: f32,
 };
 
 test {
