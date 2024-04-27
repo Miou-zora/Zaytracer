@@ -64,13 +64,52 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
     for (scene.objects.items, 0..) |object, i| {
         switch (object) {
             .cylinder => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
             .sphere => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
             .plane => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
         }
     }
@@ -123,8 +162,7 @@ pub fn main() !void {
     const allocator = arena.allocator();
 
     const config = try Config.fromFilePath("config.json", allocator);
-    std.debug.print("{any}\n", .{config.objects});
-    const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
+
     const light = Light{
         .color = .{ .b = 255, .g = 255, .r = 255 },
         .intensity = 0.6,
@@ -153,6 +191,11 @@ pub fn main() !void {
             .specular = 100,
             .color = .{ .b = 255, .g = 0, .r = 0 },
         },
+        .transform = .{ .rotation = .{
+            .x = -0.3,
+            .y = 0,
+            .z = 0,
+        } },
     } });
     try scene.objects.append(.{ .plane = .{
         .normal = Vec3{
@@ -169,10 +212,14 @@ pub fn main() !void {
             .specular = 100,
             .color = .{ .b = 0, .g = 255, .r = 0 },
         },
+        .transform = .{ .translation = .{
+            .x = 0,
+            .y = 0.5,
+            .z = 0,
+        } },
     } });
     try scene.lights.append(.{ .point_light = light });
     try scene.lights.append(.{ .ambient_light = ambiant_light });
-    try scene.transforms.append(cylinder_translation);
 
     const height: u32 = 1000;
     const width: u32 = 1000;

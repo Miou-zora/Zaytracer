@@ -4,6 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
+const Transformation = @import("Transformation.zig").Transformation;
 
 pub const Cylinder = struct {
     const Self = @This();
@@ -11,6 +12,7 @@ pub const Cylinder = struct {
     radius: f32,
     origin: Pt3,
     material: Material,
+    transform: ?Transformation,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const rx_minus_cx = ray.origin.x - self.origin.x;
@@ -60,6 +62,7 @@ test "hit" {
         .radius = 1.0,
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },
@@ -80,6 +83,7 @@ test "dontHit" {
         .radius = 1.0,
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 1.0, .y = 1.0, .z = 0.0 },
@@ -94,6 +98,7 @@ test "limit" {
         .radius = 1.0,
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0.0, .y = 2.0, .z = 0.0 },

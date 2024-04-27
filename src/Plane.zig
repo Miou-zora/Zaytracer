@@ -4,6 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
+const Transformation = @import("Transformation.zig").Transformation;
 
 pub const Plane = struct {
     const Self = @This();
@@ -11,6 +12,11 @@ pub const Plane = struct {
     normal: Vec3,
     origin: Pt3,
     material: Material,
+    transform: ?Transformation,
+
+    pub fn deinit(self: *Self) void {
+        self.transform.deinit();
+    }
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const denom = self.normal.dot(ray.direction);
@@ -41,6 +47,7 @@ test "hit" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{
@@ -64,6 +71,7 @@ test "dontHit" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{
@@ -81,6 +89,7 @@ test "parallel" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{

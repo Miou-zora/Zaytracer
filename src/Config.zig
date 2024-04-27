@@ -8,7 +8,7 @@ const Object = Scene.SceneObject;
 
 const ObjectProxy = struct {
     sphere: ?struct {
-        center: Pt3,
+        origin: Pt3,
         radius: f32,
         material: usize,
     },
@@ -43,9 +43,10 @@ pub const Config = struct {
         for (proxy.objects, 0..) |obj, i| {
             if (obj.sphere) |item| {
                 conf.objects[i] = Object{ .sphere = .{
-                    .center = item.center,
+                    .origin = item.origin,
                     .radius = item.radius,
                     .material = proxy.materials[item.material],
+                    .transform = null,
                 } };
             } else {
                 unreachable;

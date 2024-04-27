@@ -4,22 +4,24 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
+const Transformation = @import("Transformation.zig").Transformation;
 
 pub const Sphere = struct {
     const Self = @This();
 
-    center: Pt3,
+    origin: Pt3,
     radius: f32,
     material: Material,
+    transform: ?Transformation,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const a: f32 = ray.direction.dot(ray.direction);
         const b: f32 =
-            2 * (ray.direction.x * (ray.origin.x - self.center.x) +
-            ray.direction.y * (ray.origin.y - self.center.y) +
-            ray.direction.z * (ray.origin.z - self.center.z));
-        const ro_minus_center = ray.origin.subVec3(self.center);
-        const c: f32 = ro_minus_center.mulVec3(ro_minus_center).sum() - self.radius * self.radius; // Precalculate r*r
+            2 * (ray.direction.x * (ray.origin.x - self.origin.x) +
+            ray.direction.y * (ray.origin.y - self.origin.y) +
+            ray.direction.z * (ray.origin.z - self.origin.z));
+        const ro_minus_origin = ray.origin.subVec3(self.origin);
+        const c: f32 = ro_minus_origin.mulVec3(ro_minus_origin).sum() - self.radius * self.radius; // Precalculate r*r
         const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();
@@ -31,7 +33,7 @@ pub const Sphere = struct {
             } else {
                 return HitRecord{
                     .hit = true,
-                    .normal = intersection_point.subVec3(self.center),
+                    .normal = intersection_point.subVec3(self.origin),
                     .intersection_point = intersection_point,
                     .t = t,
                     .material = self.material,
@@ -50,7 +52,7 @@ pub const Sphere = struct {
             } else {
                 return HitRecord{
                     .hit = true,
-                    .normal = intersection_point.subVec3(self.center),
+                    .normal = intersection_point.subVec3(self.origin),
                     .intersection_point = intersection_point,
                     .t = t,
                     .material = self.material,
@@ -62,9 +64,10 @@ pub const Sphere = struct {
 
 test "hit" {
     const sphere = Sphere{
-        .center = Pt3{ .x = 0, .y = 0, .z = 0 },
+        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = 0, .z = 2 },
@@ -83,9 +86,10 @@ test "hit" {
 
 test "dontHit" {
     const sphere = Sphere{
-        .center = Pt3{ .x = 100, .y = 100, .z = 100 },
+        .origin = Pt3{ .x = 100, .y = 100, .z = 100 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
@@ -98,9 +102,10 @@ test "dontHit" {
 
 test "limit" {
     const sphere = Sphere{
-        .center = Pt3{ .x = 0, .y = 0, .z = 0 },
+        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = -1, .z = -1 },

@@ -24,20 +24,17 @@ pub const Scene = struct {
     camera: Camera,
     objects: std.ArrayList(SceneObject),
     lights: std.ArrayList(SceneLight),
-    transforms: std.ArrayList(Transformation),
 
     pub fn init(allocator: std.mem.Allocator, camera: Camera) Self {
         return Self{
             .camera = camera,
             .objects = std.ArrayList(SceneObject).init(allocator),
             .lights = std.ArrayList(SceneLight).init(allocator),
-            .transforms = std.ArrayList(Transformation).init(allocator),
         };
     }
 
     pub fn deinit(self: *Self) void {
         self.objects.deinit();
         self.lights.deinit();
-        self.transforms.deinit();
     }
 };
