@@ -67,6 +67,7 @@ test "hit" {
         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = 0, .z = 2 },
@@ -88,6 +89,7 @@ test "dontHit" {
         .origin = Pt3{ .x = 100, .y = 100, .z = 100 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
@@ -103,6 +105,7 @@ test "limit" {
         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
         .radius = 1,
         .material = Material.nil(),
+        .transform = null,
     };
     const ray = Ray{
         .origin = Pt3{ .x = 0, .y = -1, .z = -1 },

@@ -47,6 +47,7 @@ test "hit" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{
@@ -70,6 +71,7 @@ test "dontHit" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{
@@ -87,6 +89,7 @@ test "parallel" {
         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
         .material = Material.nil(),
+        .transform = null,
     };
 
     const ray = Ray{
