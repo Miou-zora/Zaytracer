@@ -63,13 +63,52 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
     for (scene.objects.items, 0..) |object, i| {
         switch (object) {
             .cylinder => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
             .sphere => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
             .plane => |item| {
-                list_of_hits[i] = item.hits(ray);
+                if (item.transform) |transform| {
+                    switch (transform) {
+                        .translation => |translation| {
+                            const new_ray = translation.ray_global_to_object(ray);
+                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                        },
+                        .rotation => |rotation| {
+                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
+                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                        },
+                    }
+                } else {
+                    list_of_hits[i] = item.hits(ray);
+                }
             },
         }
     }
@@ -136,7 +175,6 @@ pub fn main() !void {
             },
         },
     };
-    const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
         .color = .{ .blue = 255, .green = 255, .red = 255 },
         .intensity = 0.6,
@@ -165,9 +203,14 @@ pub fn main() !void {
             .specular = 100,
             .color = .{ .blue = 255, .green = 0, .red = 0 },
         },
+        .transform = .{ .rotation = .{
+            .x = -0.3,
+            .y = 0,
+            .z = 0,
+        } },
     } });
     try scene.objects.append(.{ .sphere = .{
-        .center = Pt3{
+        .origin = Pt3{
             .x = -0.2,
             .y = -0.5,
             .z = 2,
@@ -177,6 +220,7 @@ pub fn main() !void {
             .specular = 100,
             .color = .{ .blue = 0, .green = 0, .red = 255 },
         },
+        .transform = null,
     } });
     try scene.objects.append(.{ .plane = .{
         .normal = Vec3{
@@ -193,13 +237,17 @@ pub fn main() !void {
             .specular = 100,
             .color = .{ .blue = 0, .green = 255, .red = 0 },
         },
+        .transform = .{ .translation = .{
+            .x = 0,
+            .y = 0.5,
+            .z = 0,
+        } },
     } });
     try scene.lights.append(.{ .point_light = light });
     try scene.lights.append(.{ .ambient_light = ambiant_light });
-    try scene.transforms.append(cylinder_translation);
 
-    const height: u32 = 10000;
-    const width: u32 = 10000;
+    const height: u32 = 1000;
+    const width: u32 = 1000;
 
     var image = qoi.Image{
         .width = width,

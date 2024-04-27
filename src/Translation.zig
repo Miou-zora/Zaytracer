@@ -21,6 +21,8 @@ pub const Translation = struct {
             .hit = ray.hit,
             .intersection_point = ray.intersection_point.addVec3(Vec3{ .x = self.x, .y = self.y, .z = self.z }),
             .normal = ray.normal,
+            .t = ray.t,
+            .material = ray.material,
         };
     }
 };
