@@ -32,7 +32,18 @@
                     "z": 2
                 },
                 "radius": 0.5,
-                "material": 0
+                "material": 1
+            }
+        },
+        {
+            "sphere": {
+                "origin": {
+                    "x": -0.2,
+                    "y": 0.5,
+                    "z": 2
+                },
+                "radius": 0.3,
+                "material": 1
             }
         }
     ],
@@ -43,7 +54,17 @@
                 "r": 200,
                 "g": 0,
                 "b": 200
-            }
+            },
+            "reflective": 0.5
+        },
+        {
+            "specular": 0,
+            "color": {
+                "r": 200,
+                "g": 200,
+                "b": 200
+            },
+            "reflective": 1
         }
     ]
 }
