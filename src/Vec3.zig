@@ -119,6 +119,10 @@ pub const Vec3 = struct {
     pub fn sum(self: *const Self) f32 {
         return self.x + self.y + self.z;
     }
+
+    pub fn reflect(self: *const Self, normal: Self) Vec3 {
+        return normal.mulf32(self.dot(normal) * 2).subVec3(self.*);
+    }
 };
 
 test "subVec3" {

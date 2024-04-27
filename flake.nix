@@ -18,6 +18,7 @@
           nativeBuildInputs = [
             zigPackage
             pkgs.linuxPackages_latest.perf
+            pkgs.ffmpeg
           ];
         };
         packages.default = pkgs.stdenv.mkDerivation {
