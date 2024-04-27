@@ -18,10 +18,17 @@ const Config = @import("Config.zig").Config;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
+    var t_max: f32 = std.math.floatMax(f32);
     for (scene.lights.items) |light| {
+        t_max = std.math.floatMax(f32);
         switch (light) {
             .point_light => |item| {
                 const L = intersection.to(item.position).normalized();
+                t_max = intersection.to(item.position).length();
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection }, 0, t_max);
+                if (closest_hit.hit) {
+                    continue;
+                }
                 const n_dot_l = normal.dot(L);
                 const em = n_dot_l / (normal.length() * L.length()) * item.intensity;
                 if (em < 0) {
@@ -56,27 +63,33 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
     };
 }
 
-fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: u32, list_of_hits: []HitRecord) qoi.Color {
-    const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
-    const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
-    const ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
-
-    for (scene.objects.items, 0..) |object, i| {
+fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
+    var closest_hit: HitRecord = HitRecord.nil();
+    for (scene.objects.items) |object| {
         switch (object) {
             .cylinder => |item| {
                 if (item.transform) |transform| {
                     switch (transform) {
                         .translation => |translation| {
                             const new_ray = translation.ray_global_to_object(ray);
-                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                         .rotation => |rotation| {
                             const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                     }
                 } else {
-                    list_of_hits[i] = item.hits(ray);
+                    const record = item.hits(ray);
+                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                        closest_hit = record;
+                    }
                 }
             },
             .sphere => |item| {
@@ -84,15 +97,24 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
                     switch (transform) {
                         .translation => |translation| {
                             const new_ray = translation.ray_global_to_object(ray);
-                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                         .rotation => |rotation| {
                             const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                     }
                 } else {
-                    list_of_hits[i] = item.hits(ray);
+                    const record = item.hits(ray);
+                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                        closest_hit = record;
+                    }
                 }
             },
             .plane => |item| {
@@ -100,31 +122,39 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
                     switch (transform) {
                         .translation => |translation| {
                             const new_ray = translation.ray_global_to_object(ray);
-                            list_of_hits[i] = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                         .rotation => |rotation| {
                             const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            list_of_hits[i] = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
+                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                                closest_hit = record;
+                            }
                         },
                     }
                 } else {
-                    list_of_hits[i] = item.hits(ray);
+                    const record = item.hits(ray);
+                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                        closest_hit = record;
+                    }
                 }
             },
         }
     }
+    return closest_hit;
+}
 
-    var closest_hit: HitRecord = HitRecord.nil();
-    for (list_of_hits) |hit| {
-        if (hit.hit and (!closest_hit.hit or hit.t < closest_hit.t)) {
-            closest_hit = hit;
-        }
-    }
+fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: u32) qoi.Color {
+    const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
+    const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
+    const ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
+
+    const closest_hit = find_closest_intersection(scene, ray, std.math.floatMin(f32), std.math.floatMax(f32));
 
     if (closest_hit.hit) {
-        closest_hit.intersection_point.x = closest_hit.intersection_point.x + closest_hit.normal.x * 0.001;
-        closest_hit.intersection_point.y = closest_hit.intersection_point.y + closest_hit.normal.y * 0.001;
-        closest_hit.intersection_point.z = closest_hit.intersection_point.z + closest_hit.normal.z * 0.001;
         const norm = closest_hit.normal.normalized();
         const inter = closest_hit.intersection_point;
         const material = closest_hit.material;
@@ -145,12 +175,10 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
     };
 }
 
-fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
-    const list_of_hits: []HitRecord = try allocator.alloc(HitRecord, scene.objects.items.len);
-    defer allocator.free(list_of_hits);
+fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
     for (0..height) |y| {
         for (0..width) |x| {
-            pixels[x + y * width] = get_pixel_color(x, y, scene, height, width, list_of_hits);
+            pixels[x + y * width] = get_pixel_color(x, y, scene, height, width);
         }
     }
 }
@@ -166,7 +194,7 @@ pub fn main() !void {
     const light = Light{
         .color = .{ .b = 255, .g = 255, .r = 255 },
         .intensity = 0.6,
-        .position = .{ .x = 0, .y = 1, .z = 2 },
+        .position = .{ .x = 1, .y = -0.1, .z = 3 },
     };
     const ambiant_light: AmbientLight = .{
         .color = .{ .b = 255, .g = 255, .r = 255 },
@@ -232,7 +260,7 @@ pub fn main() !void {
     };
     defer image.deinit(allocator);
 
-    try calculate_image(image.pixels, &scene, height, width, allocator);
+    try calculate_image(image.pixels, &scene, height, width);
 
     var file = try std.fs.cwd().createFile("out.qoi", .{});
     defer file.close();
