@@ -14,9 +14,10 @@ const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
+const Config = @import("Config.zig").Config;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
-    var lighting: ColorRGB = ColorRGB{ .red = 0, .green = 0, .blue = 0 };
+    var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
     for (scene.lights.items) |light| {
         switch (light) {
             .point_light => |item| {
@@ -26,32 +27,32 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
                 if (em < 0) {
                     continue;
                 }
-                lighting.blue += item.color.blue * em;
-                lighting.green += item.color.green * em;
-                lighting.red += item.color.red * em;
+                lighting.b += item.color.b * em;
+                lighting.g += item.color.g * em;
+                lighting.r += item.color.r * em;
                 if (material.specular != -1) {
                     const R = normal.mulf32(n_dot_l * 2.0).subVec3(L);
                     const V = ray.direction.inv().normalized();
                     const r_dot_v = R.dot(V);
                     if (r_dot_v > 0) {
                         const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
-                        lighting.blue += item.color.blue * i;
-                        lighting.green += item.color.green * i;
-                        lighting.red += item.color.red * i;
+                        lighting.b += item.color.b * i;
+                        lighting.g += item.color.g * i;
+                        lighting.r += item.color.r * i;
                     }
                 }
             },
             .ambient_light => |item| {
-                lighting.blue += item.color.blue * item.intensity;
-                lighting.green += item.color.green * item.intensity;
-                lighting.red += item.color.red * item.intensity;
+                lighting.b += item.color.b * item.intensity;
+                lighting.g += item.color.g * item.intensity;
+                lighting.r += item.color.r * item.intensity;
             },
         }
     }
     return ColorRGB{
-        .blue = std.math.clamp(lighting.blue, 0.0, 255.0),
-        .green = std.math.clamp(lighting.green, 0.0, 255.0),
-        .red = std.math.clamp(lighting.red, 0.0, 255.0),
+        .b = std.math.clamp(lighting.b, 0.0, 255.0),
+        .g = std.math.clamp(lighting.g, 0.0, 255.0),
+        .r = std.math.clamp(lighting.r, 0.0, 255.0),
     };
 }
 
@@ -129,9 +130,9 @@ fn get_pixel_color(x: usize, y: usize, scene: *Scene.Scene, height: u32, width: 
         const material = closest_hit.material;
         const light_color = compute_lighting(inter, norm, scene, ray, material);
         return .{
-            .r = @as(u8, @intFromFloat(material.color.red * light_color.red / 255)),
-            .g = @as(u8, @intFromFloat(material.color.green * light_color.green / 255)),
-            .b = @as(u8, @intFromFloat(material.color.blue * light_color.blue / 255)),
+            .r = @as(u8, @intFromFloat(material.color.r * light_color.r / 255)),
+            .g = @as(u8, @intFromFloat(material.color.g * light_color.g / 255)),
+            .b = @as(u8, @intFromFloat(material.color.b * light_color.b / 255)),
             .a = 255,
         };
     }
@@ -155,42 +156,29 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
-    const camera = Camera{
-        .origin = Vec3.nil(),
-        .screen = .{
-            .origin = .{
-                .x = -0.5,
-                .y = -0.5,
-                .z = 1,
-            },
-            .left = .{
-                .x = 1,
-                .y = 0,
-                .z = 0,
-            },
-            .top = .{
-                .x = 0,
-                .y = 1,
-                .z = 0,
-            },
-        },
-    };
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    const config = try Config.fromFilePath("config.json", allocator);
+
     const light = Light{
-        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .color = .{ .b = 255, .g = 255, .r = 255 },
         .intensity = 0.6,
         .position = .{ .x = 0, .y = 1, .z = 2 },
     };
     const ambiant_light: AmbientLight = .{
-        .color = .{ .blue = 255, .green = 255, .red = 255 },
+        .color = .{ .b = 255, .g = 255, .r = 255 },
         .intensity = 0.2,
     };
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
-    var scene = Scene.Scene.init(allocator, camera);
+    var scene = Scene.Scene.init(allocator, config.camera);
     defer scene.deinit();
+
+    for (config.objects) |obj| {
+        try scene.objects.append(obj);
+    }
 
     try scene.objects.append(.{ .cylinder = .{
         .radius = 0.5,
@@ -201,26 +189,13 @@ pub fn main() !void {
         },
         .material = .{
             .specular = 100,
-            .color = .{ .blue = 255, .green = 0, .red = 0 },
+            .color = .{ .b = 255, .g = 0, .r = 0 },
         },
         .transform = .{ .rotation = .{
             .x = -0.3,
             .y = 0,
             .z = 0,
         } },
-    } });
-    try scene.objects.append(.{ .sphere = .{
-        .origin = Pt3{
-            .x = -0.2,
-            .y = -0.5,
-            .z = 2,
-        },
-        .radius = 0.5,
-        .material = .{
-            .specular = 100,
-            .color = .{ .blue = 0, .green = 0, .red = 255 },
-        },
-        .transform = null,
     } });
     try scene.objects.append(.{ .plane = .{
         .normal = Vec3{
@@ -235,7 +210,7 @@ pub fn main() !void {
         },
         .material = .{
             .specular = 100,
-            .color = .{ .blue = 0, .green = 255, .red = 0 },
+            .color = .{ .b = 0, .g = 255, .r = 0 },
         },
         .transform = .{ .translation = .{
             .x = 0,
