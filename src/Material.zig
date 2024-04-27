@@ -8,7 +8,7 @@ pub const Material = struct {
 
     pub fn nil() Self {
         return Material{
-            .color = .{ .red = 0.0, .green = 0.0, .blue = 0.0 },
+            .color = .{ .r = 0.0, .g = 0.0, .b = 0.0 },
             .specular = 0.0,
         };
     }
