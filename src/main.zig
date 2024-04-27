@@ -124,9 +124,6 @@ pub fn main() !void {
     const config = try Config.fromFilePath("config.json", allocator);
     defer config.deinit();
     const config_data = config.value;
-    std.debug.print("{}\n", .{config_data});
-    std.debug.print("{}\n", .{config_data.camera});
-    // std.os.linux.exit(0);
     const camera = config_data.camera;
     const cylinder_translation = Transformation.Transformation{ .rotation = .{ .x = 0.5, .y = 0.2, .z = 0 } };
     const light = Light{
