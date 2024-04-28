@@ -273,8 +273,8 @@ pub fn main() !void {
     try scene.lights.append(.{ .point_light = light });
     try scene.lights.append(.{ .ambient_light = ambiant_light });
 
-    const height: u32 = 1920;
-    const width: u32 = 1920;
+    const height: u32 = config.camera.height;
+    const width: u32 = config.camera.width;
 
     var image = qoi.Image{
         .width = width,
