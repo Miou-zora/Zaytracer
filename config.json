@@ -48,6 +48,24 @@
                     }
                 }
             }
+        },
+        {
+            "cylinder": {
+                "origin": {
+                    "x": 2,
+                    "y": 2,
+                    "z": 10
+                },
+                "radius": 0.5,
+                "material": 3,
+                "transform": {
+                    "rotation": {
+                        "x": -0.3,
+                        "y": 0,
+                        "z": 0
+                    }
+                }
+            }
         }
     ],
     "materials": [
@@ -75,6 +93,15 @@
                 "r": 0,
                 "g": 255,
                 "b": 0
+            },
+            "reflective": 0.5
+        },
+        {
+            "specular": 100,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 255
             },
             "reflective": 0.5
         }

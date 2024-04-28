@@ -11,9 +11,11 @@ const PointLight = @import("Light.zig").Light;
 const Light = Scene.SceneLight;
 const Transformation = @import("Transformation.zig").Transformation;
 const Translation = @import("Translation.zig").Translation;
+const Rotation = @import("Rotation.zig").Rotation;
 
 const TransformationProxy = struct {
     translation: ?Translation = null,
+    rotation: ?Rotation = null,
 };
 
 const ObjectProxy = struct {
@@ -26,6 +28,12 @@ const ObjectProxy = struct {
     plane: ?struct {
         normal: Vec3,
         origin: Pt3,
+        material: usize,
+        transform: ?TransformationProxy = null,
+    } = null,
+    cylinder: ?struct {
+        origin: Pt3,
+        radius: f32,
         material: usize,
         transform: ?TransformationProxy = null,
     } = null,
@@ -47,6 +55,8 @@ fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation
     if (transform) |t| {
         if (t.translation) |i| {
             return .{ .translation = i };
+        } else if (t.rotation) |i| {
+            return .{ .rotation = i };
         } else {
             unreachable;
         }
@@ -87,6 +97,13 @@ pub const Config = struct {
                 conf.objects[i] = Object{ .plane = .{
                     .origin = item.origin,
                     .normal = item.normal,
+                    .material = proxy.materials[item.material],
+                    .transform = transform_proxy_to_transform(item.transform),
+                } };
+            } else if (obj.cylinder) |item| {
+                conf.objects[i] = Object{ .cylinder = .{
+                    .origin = item.origin,
+                    .radius = item.radius,
                     .material = proxy.materials[item.material],
                     .transform = transform_proxy_to_transform(item.transform),
                 } };

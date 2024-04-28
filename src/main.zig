@@ -223,25 +223,6 @@ pub fn main() !void {
         try scene.lights.append(obj);
     }
 
-    try scene.objects.append(.{ .cylinder = .{
-        .radius = 0.5,
-        .origin = Pt3{
-            .x = 2,
-            .y = 2,
-            .z = 10,
-        },
-        .material = .{
-            .specular = 100,
-            .color = .{ .b = 255, .g = 0, .r = 0 },
-            .reflective = 0.5,
-        },
-        .transform = .{ .rotation = .{
-            .x = -0.3,
-            .y = 0,
-            .z = 0,
-        } },
-    } });
-
     const height: u32 = config.camera.height;
     const width: u32 = config.camera.width;
 
