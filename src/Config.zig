@@ -5,19 +5,28 @@ const Pt3 = @import("Pt3.zig").Pt3;
 const Scene = @import("Scene.zig");
 const Sphere = @import("Sphere.zig").Sphere;
 const Object = Scene.SceneObject;
+const AmbientLight = @import("AmbientLight.zig").AmbientLight;
+const PointLight = @import("Light.zig").Light;
+const Light = Scene.SceneLight;
 
 const ObjectProxy = struct {
     sphere: ?struct {
         origin: Pt3,
         radius: f32,
         material: usize,
-    },
+    } = null,
+};
+
+const LightProxy = struct {
+    ambient: ?AmbientLight = null,
+    point: ?PointLight = null,
 };
 
 const ConfigProxy = struct {
     camera: Camera,
     materials: []Material,
     objects: []ObjectProxy,
+    lights: []LightProxy,
 };
 
 pub const Config = struct {
@@ -39,6 +48,7 @@ pub const Config = struct {
         var conf = Self{
             .camera = proxy.camera,
             .objects = try allocator.alloc(Object, proxy.objects.len),
+            .lights = try allocator.alloc(Light, proxy.lights.len),
         };
         for (proxy.objects, 0..) |obj, i| {
             if (obj.sphere) |item| {
@@ -52,9 +62,19 @@ pub const Config = struct {
                 unreachable;
             }
         }
+        for (proxy.lights, 0..) |obj, i| {
+            if (obj.point) |item| {
+                conf.lights[i] = Light{ .point_light = item };
+            } else if (obj.ambient) |item| {
+                conf.lights[i] = Light{ .ambient_light = item };
+            } else {
+                unreachable;
+            }
+        }
         return conf;
     }
 
     camera: Camera,
     objects: []Object,
+    lights: []Light,
 };

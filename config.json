@@ -47,5 +47,32 @@
             },
             "reflective": 1
         }
+    ],
+    "lights": [
+        {
+            "point": {
+                "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                },
+                "intensity": 1,
+                "position": {
+                    "x": 1,
+                    "y": -0.1,
+                    "z": 3
+                }
+            }
+        },
+        {
+            "ambient": {
+                "color": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                },
+                "intensity": 0.3
+            }
+        }
     ]
 }

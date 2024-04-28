@@ -213,21 +213,14 @@ pub fn main() !void {
 
     const config = try Config.fromFilePath("config.json", allocator);
 
-    const light = Light{
-        .color = .{ .b = 255, .g = 255, .r = 255 },
-        .intensity = 1,
-        .position = .{ .x = 1, .y = -0.1, .z = 3 },
-    };
-    const ambiant_light: AmbientLight = .{
-        .color = .{ .b = 255, .g = 255, .r = 255 },
-        .intensity = 0.3,
-    };
-
     var scene = Scene.Scene.init(allocator, config.camera);
     defer scene.deinit();
 
     for (config.objects) |obj| {
         try scene.objects.append(obj);
+    }
+    for (config.lights) |obj| {
+        try scene.lights.append(obj);
     }
 
     try scene.objects.append(.{ .cylinder = .{
@@ -270,8 +263,6 @@ pub fn main() !void {
             .z = 0,
         } },
     } });
-    try scene.lights.append(.{ .point_light = light });
-    try scene.lights.append(.{ .ambient_light = ambiant_light });
 
     const height: u32 = config.camera.height;
     const width: u32 = config.camera.width;
