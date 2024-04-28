@@ -2,18 +2,32 @@ const std = @import("std");
 const Camera = @import("Camera.zig").Camera;
 const Material = @import("Material.zig").Material;
 const Pt3 = @import("Pt3.zig").Pt3;
+const Vec3 = @import("Vec3.zig").Vec3;
 const Scene = @import("Scene.zig");
 const Sphere = @import("Sphere.zig").Sphere;
 const Object = Scene.SceneObject;
 const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const PointLight = @import("Light.zig").Light;
 const Light = Scene.SceneLight;
+const Transformation = @import("Transformation.zig").Transformation;
+const Translation = @import("Translation.zig").Translation;
+
+const TransformationProxy = struct {
+    translation: ?Translation = null,
+};
 
 const ObjectProxy = struct {
     sphere: ?struct {
         origin: Pt3,
         radius: f32,
         material: usize,
+        transform: ?TransformationProxy = null,
+    } = null,
+    plane: ?struct {
+        normal: Vec3,
+        origin: Pt3,
+        material: usize,
+        transform: ?TransformationProxy = null,
     } = null,
 };
 
@@ -28,6 +42,17 @@ const ConfigProxy = struct {
     objects: []ObjectProxy,
     lights: []LightProxy,
 };
+
+fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation {
+    if (transform) |t| {
+        if (t.translation) |i| {
+            return .{ .translation = i };
+        } else {
+            unreachable;
+        }
+    }
+    return null;
+}
 
 pub const Config = struct {
     const Self = @This();
@@ -56,7 +81,14 @@ pub const Config = struct {
                     .origin = item.origin,
                     .radius = item.radius,
                     .material = proxy.materials[item.material],
-                    .transform = null,
+                    .transform = transform_proxy_to_transform(item.transform),
+                } };
+            } else if (obj.plane) |item| {
+                conf.objects[i] = Object{ .plane = .{
+                    .origin = item.origin,
+                    .normal = item.normal,
+                    .material = proxy.materials[item.material],
+                    .transform = transform_proxy_to_transform(item.transform),
                 } };
             } else {
                 unreachable;

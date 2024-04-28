@@ -241,28 +241,6 @@ pub fn main() !void {
             .z = 0,
         } },
     } });
-    try scene.objects.append(.{ .plane = .{
-        .normal = Vec3{
-            .x = 0,
-            .y = 1,
-            .z = 0,
-        },
-        .origin = Pt3{
-            .x = 0,
-            .y = -1,
-            .z = 1,
-        },
-        .material = .{
-            .specular = 100,
-            .color = .{ .b = 0, .g = 255, .r = 0 },
-            .reflective = 0.5,
-        },
-        .transform = .{ .translation = .{
-            .x = 0,
-            .y = 0.5,
-            .z = 0,
-        } },
-    } });
 
     const height: u32 = config.camera.height;
     const width: u32 = config.camera.width;

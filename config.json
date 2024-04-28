@@ -26,6 +26,28 @@
                 "radius": 0.3,
                 "material": 1
             }
+        },
+        {
+            "plane": {
+                "origin": {
+                    "x": 0,
+                    "y": -1,
+                    "z": 1
+                },
+                "normal": {
+                    "x": 0,
+                    "y": 1,
+                    "z": 0
+                },
+                "material": 2,
+                "transform": {
+                    "translation": {
+                        "x": 0,
+                        "y": 0.5,
+                        "z": 0
+                    }
+                }
+            }
         }
     ],
     "materials": [
@@ -46,6 +68,15 @@
                 "b": 200
             },
             "reflective": 1
+        },
+        {
+            "specular": 100,
+            "color": {
+                "r": 0,
+                "g": 255,
+                "b": 0
+            },
+            "reflective": 0.5
         }
     ],
     "lights": [
