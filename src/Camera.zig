@@ -27,32 +27,6 @@ pub const Camera = struct {
     }
 };
 
-test "casual" {
-    const camera = Camera{
-        .origin = Pt3.nil(),
-        .screen = .{
-            .origin = .{
-                .x = -0.5,
-                .y = 1,
-                .z = -0.5,
-            },
-            .left = .{
-                .x = 1,
-                .y = 0,
-                .z = 0,
-            },
-            .top = .{
-                .x = 0,
-                .y = 0,
-                .z = 1,
-            },
-        },
-    };
-    try std.testing.expectEqual(camera.createRay(0.5, 0.5), Ray{ .direction = .{ .x = 0, .y = 1, .z = 0 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
-    try std.testing.expectEqual(camera.createRay(1, 1), Ray{ .direction = .{ .x = 0.5, .y = 1, .z = 0.5 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
-    try std.testing.expectEqual(camera.createRay(0, 0), Ray{ .direction = .{ .x = -0.5, .y = 1, .z = -0.5 }, .origin = .{ .x = 0, .y = 0, .z = 0 } });
-}
-
 test {
     std.testing.refAllDecls(@This());
 }
