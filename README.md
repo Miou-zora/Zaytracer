@@ -1,5 +1,7 @@
 # Zaytracer (Raytracer in zig)
 
+![Rendered image of the raytracer](render.png)
+
 ## :bookmark_tabs: <samp>Requirements</samp>
 
 - :cherry_blossom: <samp>[Nix](https://nixos.org/download.html)</samp>
