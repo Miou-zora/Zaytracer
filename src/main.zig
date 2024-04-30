@@ -156,8 +156,6 @@ pub fn main() !void {
 
     const allocator = arena.allocator();
 
-    // const config = try Config.fromFilePath("config.json", allocator);
-
     const cylinder_translation = Translation.init(2, 2, 10);
     const light = Light{
         .color = .{ .b = 255, .g = 255, .r = 255 },
