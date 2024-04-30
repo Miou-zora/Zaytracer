@@ -9,14 +9,20 @@ pub const Translation = struct {
     y: f32,
     z: f32,
 
-    pub fn ray_global_to_object(self: *const Self, ray: Ray) Ray {
+    pub fn ray_global_to_object(self: *const Self, ray: Ray, origin: Vec3) Ray {
+        comptime {
+            _ = origin;
+        }
         return Ray{
             .origin = ray.origin.subVec3(Vec3{ .x = self.x, .y = self.y, .z = self.z }),
             .direction = ray.direction,
         };
     }
 
-    pub fn hitRecord_object_to_global(self: *const Self, ray: HitRecord) HitRecord {
+    pub fn hitRecord_object_to_global(self: *const Self, ray: HitRecord, origin: Vec3) HitRecord {
+        comptime {
+            _ = origin;
+        }
         return HitRecord{
             .hit = ray.hit,
             .intersection_point = ray.intersection_point.addVec3(Vec3{ .x = self.x, .y = self.y, .z = self.z }),

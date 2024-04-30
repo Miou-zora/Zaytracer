@@ -73,3 +73,9 @@ perf report -g 'graph,0.5,caller'
 ```
 
 You will need a debug build for that, else you won't have debug symbols.
+
+### Time measures
+```sh
+nix-shell -p hyperfine
+hyperfine "./result/bin/Zaytracer" --min-runs 100 --warmup 10
+```
