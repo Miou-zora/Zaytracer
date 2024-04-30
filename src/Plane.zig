@@ -16,7 +16,6 @@ pub const Plane = struct {
 
     pub fn deinit(self: *Self) void {
         self.transform.deinit();
-        std.mem.Allocator
     }
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
