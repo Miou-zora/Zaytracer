@@ -14,11 +14,6 @@ pub const Plane = struct {
     material: Material,
     transform: ?Transformation,
 
-    pub fn deinit(self: *Self) void {
-        self.transform.deinit();
-        std.mem.Allocator
-    }
-
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const denom = self.normal.dot(ray.direction);
 

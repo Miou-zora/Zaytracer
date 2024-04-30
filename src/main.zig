@@ -9,7 +9,7 @@ const Light = @import("Light.zig").Light;
 const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const Plane = @import("Plane.zig").Plane;
 const HitRecord = @import("HitRecord.zig").HitRecord;
-const Transformation = @import("Transformation.zig");
+const Transformation = @import("Transformation.zig").Transformation;
 const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
@@ -67,8 +67,8 @@ fn contains_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) 
         switch (object) {
             inline else => |item| {
                 if (item.transform) |transform| {
-                    const new_ray = Transformation.ray_global_to_object(ray, transform, item.origin);
-                    const record = Transformation.hitRecord_object_to_global(item.hits(new_ray), transform, item.origin);
+                    const new_ray = transform.ray_global_to_object(ray, item.origin);
+                    const record = transform.hitRecord_object_to_global(item.hits(new_ray), item.origin);
                     if (record.hit and record.t > t_min and record.t < t_max) {
                         return true;
                     }
@@ -92,7 +92,7 @@ fn getOrigin(object: Scene.SceneObject) Pt3 {
     }
 }
 
-fn getTransform(object: Scene.SceneObject) ?Transformation.Transformation {
+fn getTransform(object: Scene.SceneObject) ?Transformation {
     switch (object) {
         inline else => |item| {
             return item.transform;
@@ -113,8 +113,8 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
     for (scene.objects.items) |object| {
         const origin = getOrigin(object);
         if (getTransform(object)) |transform| {
-            const new_ray = Transformation.ray_global_to_object(ray, transform, origin);
-            const record = Transformation.hitRecord_object_to_global(getHits(object, new_ray), transform, origin);
+            const new_ray = transform.ray_global_to_object(ray, origin);
+            const record = transform.hitRecord_object_to_global(getHits(object, new_ray), origin);
             if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                 closest_hit = record;
             }

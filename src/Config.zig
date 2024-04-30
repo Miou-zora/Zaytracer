@@ -51,12 +51,15 @@ const ConfigProxy = struct {
     lights: []LightProxy,
 };
 
-fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation {
+fn transform_proxy_to_transform(transform: ?TransformationProxy, alloc: std.mem.Allocator) !?Transformation {
     if (transform) |t| {
+        const y = try alloc.create(TransformationProxy);
         if (t.translation) |i| {
-            return .{ .translation = i };
+            y.translation = i;
+            return y.translation.?.transform();
         } else if (t.rotation) |i| {
-            return .{ .rotation = i };
+            y.rotation = i;
+            return y.rotation.?.transform();
         } else {
             unreachable;
         }
@@ -91,21 +94,21 @@ pub const Config = struct {
                     .origin = item.origin,
                     .radius = item.radius,
                     .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
+                    .transform = try transform_proxy_to_transform(item.transform, allocator),
                 } };
             } else if (obj.plane) |item| {
                 conf.objects[i] = Object{ .plane = .{
                     .origin = item.origin,
                     .normal = item.normal,
                     .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
+                    .transform = try transform_proxy_to_transform(item.transform, allocator),
                 } };
             } else if (obj.cylinder) |item| {
                 conf.objects[i] = Object{ .cylinder = .{
                     .origin = item.origin,
                     .radius = item.radius,
                     .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
+                    .transform = try transform_proxy_to_transform(item.transform, allocator),
                 } };
             } else {
                 unreachable;
