@@ -24,7 +24,10 @@ pub const Translation = struct {
         };
     }
 
-    pub fn ray_global_to_object(transformation: *const Transformation, ray: Ray) Ray {
+    pub fn ray_global_to_object(transformation: *const Transformation, ray: Ray, origin: Vec3) Ray {
+        comptime {
+            _ = origin;
+        }
         const self: *const Translation = @fieldParentPtr("interface", transformation);
         return Ray{
             .origin = ray.origin.subVec3(Vec3{ .x = self.x, .y = self.y, .z = self.z }),
@@ -32,7 +35,10 @@ pub const Translation = struct {
         };
     }
 
-    pub fn hitRecord_object_to_global(transformation: *const Transformation, ray: HitRecord) HitRecord {
+    pub fn hitRecord_object_to_global(transformation: *const Transformation, ray: HitRecord, origin: Vec3) HitRecord {
+        comptime {
+            _ = origin;
+        }
         const self: *const Translation = @fieldParentPtr("interface", transformation);
         return HitRecord{
             .hit = ray.hit,

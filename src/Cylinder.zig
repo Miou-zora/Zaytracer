@@ -5,6 +5,7 @@ const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const Transformation = @import("Transformation.zig").Transformation;
+const IObject = @import("IObject.zig").IObject;
 
 pub const Cylinder = struct {
     const Self = @This();
@@ -12,9 +13,36 @@ pub const Cylinder = struct {
     radius: f32,
     origin: Pt3,
     material: Material,
-    transform: *const Transformation,
+    transform: ?*const Transformation,
 
-    pub fn hits(self: *const Self, ray: Ray) HitRecord {
+    iObject: IObject,
+
+    pub fn init(radius: f32, origin: Pt3, material: Material, transform: ?*const Transformation) Self {
+        return Self{
+            .radius = radius,
+            .origin = origin,
+            .material = material,
+            .transform = transform,
+            .iObject = .{
+                .hitsFn = &hits,
+                .getTransformFn = &getTransform,
+                .getOriginFn = &getOrigin,
+            },
+        };
+    }
+
+    pub fn getTransform(iObject: *const IObject) ?*const Transformation {
+        const self: *const Cylinder = @fieldParentPtr("iObject", iObject);
+        return self.transform;
+    }
+
+    pub fn getOrigin(iObject: *const IObject) Pt3 {
+        const self: *const Cylinder = @fieldParentPtr("iObject", iObject);
+        return self.origin;
+    }
+
+    pub fn hits(iObject: *const IObject, ray: Ray) HitRecord {
+        const self: *const Cylinder = @fieldParentPtr("iObject", iObject);
         const rx_minus_cx = ray.origin.x - self.origin.x;
         const ry_minus_cy = ray.origin.y - self.origin.y;
         const a = ray.direction.x * ray.direction.x + ray.direction.y * ray.direction.y;

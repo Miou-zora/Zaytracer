@@ -5,6 +5,7 @@ const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const Transformation = @import("Transformation.zig").Transformation;
+const IObject = @import("IObject.zig").IObject;
 
 pub const Sphere = struct {
     const Self = @This();
@@ -12,9 +13,36 @@ pub const Sphere = struct {
     origin: Pt3,
     radius: f32,
     material: Material,
-    transform: ?Transformation,
+    transform: ?*const Transformation,
 
-    pub fn hits(self: *const Self, ray: Ray) HitRecord {
+    iObject: IObject,
+
+    pub fn init(radius: f32, origin: Pt3, material: Material, transform: ?*const Transformation) Self {
+        return Self{
+            .radius = radius,
+            .origin = origin,
+            .material = material,
+            .transform = transform,
+            .iObject = .{
+                .hitsFn = &hits,
+                .getTransformFn = &getTransform,
+                .getOriginFn = &getOrigin,
+            },
+        };
+    }
+
+    pub fn getTransform(iObject: *const IObject) ?*const Transformation {
+        const self: *const Self = @fieldParentPtr("iObject", iObject);
+        return self.transform;
+    }
+
+    pub fn getOrigin(iObject: *const IObject) Pt3 {
+        const self: *const Self = @fieldParentPtr("iObject", iObject);
+        return self.origin;
+    }
+
+    pub fn hits(iObject: *const IObject, ray: Ray) HitRecord {
+        const self: *const Self = @fieldParentPtr("iObject", iObject);
         const a: f32 = ray.direction.dot(ray.direction);
         const b: f32 =
             2 * (ray.direction.x * (ray.origin.x - self.origin.x) +

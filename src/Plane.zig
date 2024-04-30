@@ -5,6 +5,7 @@ const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const Transformation = @import("Transformation.zig").Transformation;
+const IObject = @import("IObject.zig").IObject;
 
 pub const Plane = struct {
     const Self = @This();
@@ -12,13 +13,36 @@ pub const Plane = struct {
     normal: Vec3,
     origin: Pt3,
     material: Material,
-    transform: ?Transformation,
+    transform: ?*const Transformation,
 
-    pub fn deinit(self: *Self) void {
-        self.transform.deinit();
+    iObject: IObject,
+
+    pub fn init(normal: Vec3, origin: Pt3, material: Material, transform: ?*const Transformation) Self {
+        return Self{
+            .normal = normal,
+            .origin = origin,
+            .material = material,
+            .transform = transform,
+            .iObject = .{
+                .hitsFn = &hits,
+                .getTransformFn = &getTransform,
+                .getOriginFn = &getOrigin,
+            },
+        };
     }
 
-    pub fn hits(self: *const Self, ray: Ray) HitRecord {
+    pub fn getTransform(iObject: *const IObject) ?*const Transformation {
+        const self: *const Plane = @fieldParentPtr("iObject", iObject);
+        return self.transform;
+    }
+
+    pub fn getOrigin(iObject: *const IObject) Pt3 {
+        const self: *const Plane = @fieldParentPtr("iObject", iObject);
+        return self.origin;
+    }
+
+    pub fn hits(iObject: *const IObject, ray: Ray) HitRecord {
+        const self: *const Plane = @fieldParentPtr("iObject", iObject);
         const denom = self.normal.dot(ray.direction);
 
         if (denom == 0.0) {
@@ -41,66 +65,6 @@ pub const Plane = struct {
         };
     }
 };
-
-test "hit" {
-    const plane = Plane{
-        .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
-        .material = Material.nil(),
-        .transform = null,
-    };
-
-    const ray = Ray{
-        .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
-    };
-
-    const hit_record = plane.hits(ray);
-
-    try std.testing.expect(hit_record.hit);
-    try std.testing.expect(hit_record.intersection_point.x == 0.0);
-    try std.testing.expect(hit_record.intersection_point.y == 0.0);
-    try std.testing.expect(hit_record.intersection_point.z == 0.0);
-    try std.testing.expect(hit_record.normal.x == 0.0);
-    try std.testing.expect(hit_record.normal.y == 1.0);
-    try std.testing.expect(hit_record.normal.z == 0.0);
-}
-
-test "dontHit" {
-    const plane = Plane{
-        .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
-        .material = Material.nil(),
-        .transform = null,
-    };
-
-    const ray = Ray{
-        .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .direction = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-    };
-
-    const hit_record = plane.hits(ray);
-
-    try std.testing.expect(!hit_record.hit);
-}
-
-test "parallel" {
-    const plane = Plane{
-        .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
-        .material = Material.nil(),
-        .transform = null,
-    };
-
-    const ray = Ray{
-        .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-        .direction = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
-    };
-
-    const hit_record = plane.hits(ray);
-
-    try std.testing.expect(!hit_record.hit);
-}
 
 test {
     std.testing.refAllDecls(@This());

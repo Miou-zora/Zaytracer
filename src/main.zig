@@ -16,6 +16,7 @@ const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
 const Translation = @import("Translation.zig").Translation;
+const Rotation = @import("Rotation.zig").Rotation;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
@@ -67,26 +68,18 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
 fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
     var closest_hit: HitRecord = HitRecord.nil();
     for (scene.objects.items) |object| {
-        switch (object) {
-            .cylinder => |item| {
-                const new_ray = item.transform.global_to_object(ray);
-                const record = item.transform.object_to_global(item.hits(new_ray));
-                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                    closest_hit = record;
-                }
-            },
-            .sphere => |item| {
-                const record = item.hits(ray);
-                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                    closest_hit = record;
-                }
-            },
-            .plane => |item| {
-                const record = item.hits(ray);
-                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                    closest_hit = record;
-                }
-            },
+        if (object.getTransform()) |transform| {
+            const origin = object.getOrigin();
+            const new_ray = transform.global_to_object(ray, origin);
+            const record = transform.object_to_global(object.hits(new_ray), origin);
+            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                closest_hit = record;
+            }
+        } else {
+            const record = object.hits(ray);
+            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                closest_hit = record;
+            }
         }
     }
     return closest_hit;
@@ -156,15 +149,76 @@ pub fn main() !void {
 
     const allocator = arena.allocator();
 
-    const cylinder_translation = Translation.init(2, 2, 10);
+    const plane_translation = Translation.init(0, 0.5, 0);
+    const plane = Plane.init(
+        Vec3{
+            .x = 0,
+            .y = 1,
+            .z = 0,
+        },
+        Pt3{
+            .x = 0,
+            .y = -1,
+            .z = 1,
+        },
+        Material{
+            .specular = 100,
+            .color = .{ .b = 0, .g = 255, .r = 0 },
+            .reflective = 0.5,
+        },
+        &plane_translation.interface,
+    );
+    const cylinder_rotation = Rotation.init(-0.3, 0, 0);
+    const cylinder = Cylinder.init(
+        0.5,
+        Pt3{
+            .x = 2,
+            .y = 2,
+            .z = 10,
+        },
+        Material{
+            .specular = 100,
+            .color = .{ .b = 255, .g = 0, .r = 0 },
+            .reflective = 0.5,
+        },
+        &cylinder_rotation.interface,
+    );
+    const sphere = Sphere.init(
+        0.2,
+        Pt3{
+            .x = -0.2,
+            .y = 0.5,
+            .z = 2,
+        },
+        Material{
+            .specular = 0,
+            .color = .{ .b = 200, .g = 200, .r = 200 },
+            .reflective = 1,
+        },
+        null,
+    );
+    const sphere2 = Sphere.init(
+        0.5,
+        Pt3{
+            .x = -0.2,
+            .y = -0.5,
+            .z = 2,
+        },
+        Material{
+            .specular = 0,
+            .color = .{ .b = 200, .g = 200, .r = 200 },
+            .reflective = 1,
+        },
+        null,
+    );
     const light = Light{
         .color = .{ .b = 255, .g = 255, .r = 255 },
-        .intensity = 0.6,
-        .position = .{ .x = 0, .y = 1, .z = 2 },
+        .intensity = 1,
+        .position = .{ .x = 1, .y = -0.1, .z = 3 },
     };
     const ambiant_light: AmbientLight = .{
         .color = .{ .b = 255, .g = 255, .r = 255 },
-        .intensity = 0.2,
+        .intensity = 0.3,
     };
 
     const camera = Camera{
@@ -176,43 +230,15 @@ pub fn main() !void {
     var scene = Scene.Scene.init(allocator, camera);
     defer scene.deinit();
 
-    try scene.objects.append(.{ .cylinder = .{
-        .radius = 0.5,
-        .origin = Pt3{
-            .x = 0,
-            .y = 0,
-            .z = 0,
-        },
-        .material = .{
-            .specular = 100,
-            .color = .{ .b = 255, .g = 0, .r = 0 },
-            .reflective = 0.5,
-        },
-        .transform = &cylinder_translation.interface,
-    } });
-    try scene.objects.append(.{ .plane = .{
-        .normal = Vec3{
-            .x = 0,
-            .y = 1,
-            .z = 0,
-        },
-        .origin = Pt3{
-            .x = 0,
-            .y = -1,
-            .z = 1,
-        },
-        .material = .{
-            .specular = 100,
-            .color = .{ .b = 0, .g = 255, .r = 0 },
-            .reflective = 0.5,
-        },
-        .transform = null,
-    } });
+    try scene.objects.append(&plane.iObject);
+    try scene.objects.append(&cylinder.iObject);
+    try scene.objects.append(&sphere.iObject);
+    try scene.objects.append(&sphere2.iObject);
     try scene.lights.append(.{ .point_light = light });
     try scene.lights.append(.{ .ambient_light = ambiant_light });
 
-    const height: u32 = 1000;
-    const width: u32 = 1000;
+    const height: u32 = 1080;
+    const width: u32 = 1920;
 
     var image = qoi.Image{
         .width = width,

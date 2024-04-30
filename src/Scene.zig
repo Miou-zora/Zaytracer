@@ -6,12 +6,13 @@ const Cylinder = @import("Cylinder.zig").Cylinder;
 const Plane = @import("Plane.zig").Plane;
 const Transformation = @import("Transformation.zig").Transformation;
 const std = @import("std");
+const IObject = @import("IObject.zig").IObject;
 
-pub const SceneObject = union(enum) {
-    sphere: Sphere,
-    plane: Plane,
-    cylinder: Cylinder,
-};
+// pub const SceneObject = union(enum) {
+//     sphere: Sphere,
+//     plane: Plane,
+//     cylinder: Cylinder,
+// };
 
 pub const SceneLight = union(enum) {
     point_light: Light,
@@ -22,13 +23,13 @@ pub const Scene = struct {
     const Self = @This();
 
     camera: Camera,
-    objects: std.ArrayList(SceneObject),
+    objects: std.ArrayList(*const IObject),
     lights: std.ArrayList(SceneLight),
 
     pub fn init(allocator: std.mem.Allocator, camera: Camera) Self {
         return Self{
             .camera = camera,
-            .objects = std.ArrayList(SceneObject).init(allocator),
+            .objects = std.ArrayList(*const IObject).init(allocator),
             .lights = std.ArrayList(SceneLight).init(allocator),
         };
     }
