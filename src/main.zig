@@ -15,6 +15,7 @@ const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
+const Translation = @import("Translation.zig").Translation;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
@@ -68,78 +69,22 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
     for (scene.objects.items) |object| {
         switch (object) {
             .cylinder => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
+                const new_ray = item.transform.global_to_object(ray);
+                const record = item.transform.object_to_global(item.hits(new_ray));
+                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                    closest_hit = record;
                 }
             },
             .sphere => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
+                const record = item.hits(ray);
+                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                    closest_hit = record;
                 }
             },
             .plane => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
+                const record = item.hits(ray);
+                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                    closest_hit = record;
                 }
             },
         }
@@ -211,20 +156,65 @@ pub fn main() !void {
 
     const allocator = arena.allocator();
 
-    const config = try Config.fromFilePath("config.json", allocator);
+    // const config = try Config.fromFilePath("config.json", allocator);
 
-    var scene = Scene.Scene.init(allocator, config.camera);
+    const cylinder_translation = Translation.init(2, 2, 10);
+    const light = Light{
+        .color = .{ .b = 255, .g = 255, .r = 255 },
+        .intensity = 0.6,
+        .position = .{ .x = 0, .y = 1, .z = 2 },
+    };
+    const ambiant_light: AmbientLight = .{
+        .color = .{ .b = 255, .g = 255, .r = 255 },
+        .intensity = 0.2,
+    };
+
+    const camera = Camera{
+        .width = 1920,
+        .height = 1080,
+        .fov = 40,
+    };
+
+    var scene = Scene.Scene.init(allocator, camera);
     defer scene.deinit();
 
-    for (config.objects) |obj| {
-        try scene.objects.append(obj);
-    }
-    for (config.lights) |obj| {
-        try scene.lights.append(obj);
-    }
+    try scene.objects.append(.{ .cylinder = .{
+        .radius = 0.5,
+        .origin = Pt3{
+            .x = 0,
+            .y = 0,
+            .z = 0,
+        },
+        .material = .{
+            .specular = 100,
+            .color = .{ .b = 255, .g = 0, .r = 0 },
+            .reflective = 0.5,
+        },
+        .transform = &cylinder_translation.interface,
+    } });
+    try scene.objects.append(.{ .plane = .{
+        .normal = Vec3{
+            .x = 0,
+            .y = 1,
+            .z = 0,
+        },
+        .origin = Pt3{
+            .x = 0,
+            .y = -1,
+            .z = 1,
+        },
+        .material = .{
+            .specular = 100,
+            .color = .{ .b = 0, .g = 255, .r = 0 },
+            .reflective = 0.5,
+        },
+        .transform = null,
+    } });
+    try scene.lights.append(.{ .point_light = light });
+    try scene.lights.append(.{ .ambient_light = ambiant_light });
 
-    const height: u32 = config.camera.height;
-    const width: u32 = config.camera.width;
+    const height: u32 = 1000;
+    const width: u32 = 1000;
 
     var image = qoi.Image{
         .width = width,

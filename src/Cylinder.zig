@@ -12,7 +12,7 @@ pub const Cylinder = struct {
     radius: f32,
     origin: Pt3,
     material: Material,
-    transform: ?Transformation,
+    transform: *const Transformation,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const rx_minus_cx = ray.origin.x - self.origin.x;

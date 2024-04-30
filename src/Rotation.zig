@@ -2,6 +2,7 @@ const Ray = @import("Ray.zig").Ray;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Cylinder = @import("Cylinder.zig").Cylinder;
+const Transformation = @import("Transformation.zig").Transformation;
 
 pub const Rotation = struct {
     const Self = @This();
