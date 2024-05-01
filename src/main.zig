@@ -229,22 +229,6 @@ pub fn main() !void {
         try scene.lights.append(obj);
     }
 
-    // const triangle: Scene.SceneObject = .{ .triangle = .{
-    //     .va = .{
-    //         .color = ColorRGB{ .r = 255, .g = 0, .b = 0 },
-    //         .position = Pt3{ .x = -3, .y = -0.5, .z = 2 },
-    //     },
-    //     .vb = .{
-    //         .color = ColorRGB{ .r = 0, .g = 0, .b = 255 },
-    //         .position = Pt3{ .x = -2, .y = 3, .z = 3.5 },
-    //     },
-    //     .vc = .{
-    //         .color = ColorRGB{ .r = 0, .g = 255, .b = 0 },
-    //         .position = Pt3{ .x = 0.5, .y = -0.5, .z = 4 },
-    //     },
-    // } };
-    // try scene.objects.append(triangle);
-
     const height: u32 = config.camera.height;
     const width: u32 = config.camera.width;
 
