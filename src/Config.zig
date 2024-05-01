@@ -12,6 +12,7 @@ const Light = Scene.SceneLight;
 const Transformation = @import("Transformation.zig").Transformation;
 const Translation = @import("Translation.zig").Translation;
 const Rotation = @import("Rotation.zig").Rotation;
+const Vertex = @import("Vertex.zig").Vertex;
 
 const TransformationProxy = struct {
     translation: ?Translation = null,
@@ -36,6 +37,11 @@ const ObjectProxy = struct {
         radius: f32,
         material: usize,
         transform: ?TransformationProxy = null,
+    } = null,
+    triangle: ?struct {
+        va: Vertex,
+        vb: Vertex,
+        vc: Vertex,
     } = null,
 };
 
@@ -106,6 +112,12 @@ pub const Config = struct {
                     .radius = item.radius,
                     .material = proxy.materials[item.material],
                     .transform = transform_proxy_to_transform(item.transform),
+                } };
+            } else if (obj.triangle) |item| {
+                conf.objects[i] = Object{ .triangle = .{
+                    .va = item.va,
+                    .vb = item.vb,
+                    .vc = item.vc,
                 } };
             } else {
                 unreachable;
