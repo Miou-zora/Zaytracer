@@ -12,6 +12,7 @@ pub const Triangle = struct {
     vc: Vertex,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
+        // TODO: add bvh
         const a = self.va.position;
         const b = self.vb.position;
         const c = self.vc.position;
