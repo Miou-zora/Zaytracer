@@ -39,8 +39,6 @@ pub const Triangle = struct {
             return HitRecord.nil();
         }
 
-        // map self.va.color, self.vb.color, self.vc.color
-        // to hit_point using barycentric coordinates
         const colorVA = (Vec3{ .x = self.va.color.r, .y = self.va.color.g, .z = self.va.color.b }).normalized();
         const colorVB = (Vec3{ .x = self.vb.color.r, .y = self.vb.color.g, .z = self.vb.color.b }).normalized();
         const colorVC = (Vec3{ .x = self.vc.color.r, .y = self.vc.color.g, .z = self.vc.color.b }).normalized();
