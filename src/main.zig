@@ -229,6 +229,37 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
+    // const Object = @import("Object.zig").Object;
+    // const ObjSphere: Object = .{
+    //     .shape = Object.Shape{
+    //         .sphere = .{
+    //             .origin = .{
+    //                 .x = 0,
+    //                 .y = 0,
+    //                 .z = 0,
+    //             },
+    //             .radius = 1,
+    //             .material = Material{
+    //                 .color = ColorRGB{ .r = 255, .g = 0, .b = 0 },
+    //                 .reflective = 0.5,
+    //                 .specular = 500,
+    //             },
+    //             .transform = null,
+    //         },
+    //     },
+    //     .transform = null,
+    // };
+
+    // comptime {
+    //     const rayToSphere = Ray{
+    //         .direction = Vec3{ .x = 0, .y = 0, .z = -1 },
+    //         .origin = Vec3{ .x = 0, .y = 0, .z = 2 },
+    //     };
+    //     const hit = ObjSphere.hits(rayToSphere);
+    //     _ = hit;
+    //     _ = ObjSphere.getOrigin();
+    // }
+
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
