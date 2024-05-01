@@ -50,10 +50,6 @@ pub const Triangle = struct {
             .specular = 0,
         };
         return HitRecord{
-            // .hit = true,
-            // .t = t,
-            // .hit_point = hit_point,
-            // .normal = normal,
             .hit = true,
             .t = hit_point.distance(ray.origin),
             .intersection_point = hit_point,
