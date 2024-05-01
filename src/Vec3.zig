@@ -23,6 +23,14 @@ pub const Vec3 = struct {
         };
     }
 
+    pub fn divf32(self: *const Self, other: f32) Vec3 {
+        return Vec3{
+            .x = self.x / other,
+            .y = self.y / other,
+            .z = self.z / other,
+        };
+    }
+
     pub fn normalized(self: *const Self) Vec3 {
         const vec_length = self.length();
         return Vec3{
@@ -122,6 +130,14 @@ pub const Vec3 = struct {
 
     pub fn reflect(self: *const Self, normal: Self) Vec3 {
         return normal.mulf32(self.dot(normal) * 2).subVec3(self.*);
+    }
+
+    pub fn cross(self: *const Self, other: Self) Vec3 {
+        return Vec3{
+            .x = self.y * other.z - self.z * other.y,
+            .y = self.z * other.x - self.x * other.z,
+            .z = self.x * other.y - self.y * other.x,
+        };
     }
 };
 

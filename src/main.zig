@@ -15,6 +15,7 @@ const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
+// const Triangle = @import("Triangle.zig").Triangle;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
@@ -25,7 +26,7 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
             .point_light => |item| {
                 const L = intersection.to(item.position).normalized();
                 t_max = intersection.to(item.position).length();
-                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection.addVec3(normal.mulf32(0.0001)) }, 0.0001, t_max);
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection.addVec3(normal.mulf32(0.00001)) }, 0.00001, t_max);
                 if (closest_hit.hit) {
                     continue;
                 }
@@ -142,6 +143,12 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                     }
                 }
             },
+            .triangle => |item| {
+                const record = item.hits(ray);
+                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                    closest_hit = record;
+                }
+            },
         }
     }
     return closest_hit;
@@ -222,6 +229,22 @@ pub fn main() !void {
     for (config.lights) |obj| {
         try scene.lights.append(obj);
     }
+
+    const triangle: Scene.SceneObject = .{ .triangle = .{
+        .va = .{
+            .color = ColorRGB{ .r = 255, .g = 0, .b = 0 },
+            .position = Pt3{ .x = -3, .y = -0.5, .z = 2 },
+        },
+        .vb = .{
+            .color = ColorRGB{ .r = 0, .g = 0, .b = 255 },
+            .position = Pt3{ .x = -2, .y = 3, .z = 3.5 },
+        },
+        .vc = .{
+            .color = ColorRGB{ .r = 0, .g = 255, .b = 0 },
+            .position = Pt3{ .x = 0.5, .y = -0.5, .z = 4 },
+        },
+    } };
+    try scene.objects.append(triangle);
 
     const height: u32 = config.camera.height;
     const width: u32 = config.camera.width;

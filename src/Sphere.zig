@@ -35,7 +35,7 @@ pub const Sphere = struct {
                     .hit = true,
                     .normal = intersection_point.subVec3(self.origin),
                     .intersection_point = intersection_point,
-                    .t = t,
+                    .t = intersection_point.distance(ray.origin),
                     .material = self.material,
                 };
             }
@@ -54,7 +54,7 @@ pub const Sphere = struct {
                     .hit = true,
                     .normal = intersection_point.subVec3(self.origin),
                     .intersection_point = intersection_point,
-                    .t = t,
+                    .t = intersection_point.distance(ray.origin),
                     .material = self.material,
                 };
             }
