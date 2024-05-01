@@ -36,7 +36,7 @@ pub const Plane = struct {
             .hit = true,
             .intersection_point = hit_point,
             .normal = self.normal,
-            .t = t,
+            .t = hit_point.distance(ray.origin),
             .material = self.material,
         };
     }

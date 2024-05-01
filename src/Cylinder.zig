@@ -34,7 +34,7 @@ pub const Cylinder = struct {
                     .hit = true,
                     .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 },
                     .intersection_point = intersection_point,
-                    .t = t,
+                    .t = intersection_point.distance(ray.origin),
                     .material = self.material,
                 };
             }
@@ -50,7 +50,7 @@ pub const Cylinder = struct {
                 .hit = true,
                 .normal = Vec3{ .x = intersection_point.x - self.origin.x, .y = intersection_point.y - self.origin.y, .z = 0 },
                 .intersection_point = intersection_point,
-                .t = t,
+                .t = intersection_point.distance(ray.origin),
                 .material = self.material,
             };
         }

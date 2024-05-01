@@ -6,11 +6,13 @@ const Cylinder = @import("Cylinder.zig").Cylinder;
 const Plane = @import("Plane.zig").Plane;
 const Transformation = @import("Transformation.zig").Transformation;
 const std = @import("std");
+const Triangle = @import("Triangle.zig").Triangle;
 
 pub const SceneObject = union(enum) {
     sphere: Sphere,
     plane: Plane,
     cylinder: Cylinder,
+    triangle: Triangle,
 };
 
 pub const SceneLight = union(enum) {

@@ -16,6 +16,8 @@ const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
 
+const EPSILON = 0.00001;
+
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
     var t_max: f32 = std.math.floatMax(f32);
@@ -25,7 +27,7 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
             .point_light => |item| {
                 const L = intersection.to(item.position).normalized();
                 t_max = intersection.to(item.position).length();
-                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection.addVec3(normal.mulf32(0.0001)) }, 0.0001, t_max);
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection.addVec3(normal.mulf32(EPSILON)) }, EPSILON, t_max);
                 if (closest_hit.hit) {
                     continue;
                 }
@@ -140,6 +142,12 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                     if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                         closest_hit = record;
                     }
+                }
+            },
+            .triangle => |item| {
+                const record = item.hits(ray);
+                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+                    closest_hit = record;
                 }
             },
         }
