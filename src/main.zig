@@ -143,7 +143,6 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                 }
             },
             .triangle => |item| {
-                // std.debug.print("{}\n", .{item});
                 const record = item.hits(ray);
                 if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                     closest_hit = record;
