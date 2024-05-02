@@ -87,7 +87,7 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                     //         }
                     //     },
                     // }
-                    const new_ray = transform.ray_global_to_object(ray, &item.origin);
+                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
                     const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
                     if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                         closest_hit = record;
@@ -117,7 +117,7 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                     //         }
                     //     },
                     // }
-                    const new_ray = transform.ray_global_to_object(ray, &item.origin);
+                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
                     const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
                     if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                         closest_hit = record;
@@ -147,7 +147,7 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
                     //         }
                     //     },
                     // }
-                    const new_ray = transform.ray_global_to_object(ray, &item.origin);
+                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
                     const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
                     if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
                         closest_hit = record;

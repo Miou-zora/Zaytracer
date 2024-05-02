@@ -10,7 +10,7 @@ pub const Rotation = struct {
     y: f32,
     z: f32,
 
-    pub fn ray_global_to_object(self: *const Self, ray: Ray, origin: *const Vec3) Ray {
+    pub fn ray_global_to_object(self: *const Self, ray: *const Ray, origin: *const Vec3) Ray {
         var ray_in_object_space = Ray{
             .direction = ray.direction,
             .origin = ray.origin.subVec3(origin.*),

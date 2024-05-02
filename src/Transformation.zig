@@ -10,7 +10,7 @@ pub const Transformation = union(enum) {
     translation: Translation,
     rotation: Rotation,
 
-    pub fn ray_global_to_object(self: *const Self, ray: Ray, origin: *const Pt3) Ray {
+    pub inline fn ray_global_to_object(self: *const Self, ray: *const Ray, origin: *const Pt3) Ray {
         switch (self.*) {
             .translation => |value| {
                 return value.ray_global_to_object(ray);
@@ -21,7 +21,7 @@ pub const Transformation = union(enum) {
         }
     }
 
-    pub fn hitRecord_object_to_global(self: *const Self, ray: HitRecord, origin: *const Pt3) HitRecord {
+    pub inline fn hitRecord_object_to_global(self: *const Self, ray: HitRecord, origin: *const Pt3) HitRecord {
         switch (self.*) {
             .translation => |value| {
                 return value.hitRecord_object_to_global(ray);
