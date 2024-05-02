@@ -1,6 +1,7 @@
 # Nix
 .direnv
 .envrc
+result
 
 # Zig
 zig-cache/
