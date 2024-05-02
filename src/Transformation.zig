@@ -24,10 +24,10 @@ pub const Transformation = union(enum) {
     pub inline fn hitRecord_object_to_global(self: *const Self, ray: HitRecord, origin: *const Pt3) HitRecord {
         switch (self.*) {
             .translation => |value| {
-                return value.hitRecord_object_to_global(ray);
+                return value.hitRecord_object_to_global(&ray);
             },
             .rotation => |value| {
-                return value.hitRecord_object_to_global(ray, origin);
+                return value.hitRecord_object_to_global(&ray, origin);
             },
         }
     }

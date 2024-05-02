@@ -27,7 +27,7 @@ pub const Rotation = struct {
         };
     }
 
-    pub fn hitRecord_object_to_global(self: *const Self, hitrecord: HitRecord, origin: *const Vec3) HitRecord {
+    pub fn hitRecord_object_to_global(self: *const Self, hitrecord: *const HitRecord, origin: *const Vec3) HitRecord {
         var hitrecord_in_object_space = HitRecord{
             .intersection_point = hitrecord.intersection_point.subVec3(origin.*),
             .normal = hitrecord.normal,

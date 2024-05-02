@@ -16,7 +16,7 @@ pub const Translation = struct {
         };
     }
 
-    pub inline fn hitRecord_object_to_global(self: *const Self, ray: HitRecord) HitRecord {
+    pub inline fn hitRecord_object_to_global(self: *const Self, ray: *const HitRecord) HitRecord {
         return HitRecord{
             .hit = ray.hit,
             .intersection_point = ray.intersection_point.addVec3(Vec3{ .x = self.x, .y = self.y, .z = self.z }),
