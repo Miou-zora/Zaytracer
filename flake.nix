@@ -19,6 +19,7 @@
             zigPackage
             pkgs.linuxPackages_latest.perf
             pkgs.ffmpeg
+            pkgs.hyperfine
           ];
         };
         packages.default = pkgs.stdenv.mkDerivation {
