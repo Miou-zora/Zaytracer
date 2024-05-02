@@ -201,9 +201,14 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
     };
 }
 
-fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
+var current_height: std.atomic.Value(u32) = std.atomic.Value(u32).init(0);
+
+fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
     const recursion_depth = 5;
-    for (0..height) |y| {
+    while (true) {
+        const y = current_height.fetchAdd(1, .monotonic);
+        if (y >= height)
+            return;
         for (0..width) |x| {
             const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
             const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
@@ -211,6 +216,16 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
             pixels[x + y * width] = get_pixel_color(ray, scene, height, width, recursion_depth);
         }
     }
+}
+
+fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
+    const num_threads = try std.Thread.getCpuCount();
+    var threads = try allocator.alloc(std.Thread, num_threads);
+
+    for (0..num_threads) |i|
+        threads[i] = try std.Thread.spawn(.{ .allocator = allocator }, calculate_image_worker, .{ pixels, scene, height, width });
+    for (threads) |thread|
+        thread.join();
 }
 
 pub fn main() !void {
@@ -242,7 +257,7 @@ pub fn main() !void {
     };
     defer image.deinit(allocator);
 
-    try calculate_image(image.pixels, &scene, height, width);
+    try calculate_image(image.pixels, &scene, height, width, allocator);
 
     var file = try std.fs.cwd().createFile("out.qoi", .{});
     defer file.close();
