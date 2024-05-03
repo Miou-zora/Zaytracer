@@ -86,6 +86,6 @@ hyperfine "./result/bin/Zaytracer" --warmup 10
 ```
 
 or if you use `zig build -Doptimize=ReleaseFast`:
-```
+```sh
 hyperfine "./zig-out/bin/Zaytracer" --warmup 10
 ```
