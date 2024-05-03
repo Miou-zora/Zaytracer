@@ -16,7 +16,7 @@
 ### :wrench: <samp>Setup</samp>
 
 Clone this repository and run `nix develop` to enter the development environment
-```shell
+```sh
 git clone https://github.com/Miou-zora/Zaytracer.git
 cd Zaytracer
 nix develop
@@ -24,18 +24,31 @@ nix develop
 
 ### :construction_worker: <samp>Building</samp>
 
-```shell
+#### Release
+```sh
+zig build -Doptimize=ReleaseFast
+# or
+nix build
+```
+#### Debug
+```sh
 zig build
 ```
 
 ### :rocket: <samp>Running</samp>
 
+#### With `zig build` or `zig build -Doptimize=ReleaseFast`
 
-```shell
+```sh
 # It will build the project and run it. (do nothing if the project is already built)
 zig build run
 # or you can run the executable directly
-./zig-out/bin/zaytracer
+./zig-out/bin/Zaytracer
+```
+#### With `nix build`
+
+```
+./result/bin/Zaytracer
 ```
 
 ### :heavy_plus_sign: <samp>Using direnv</samp>
@@ -64,7 +77,9 @@ echo "use flake" | tee .envrc
 direnv allow
 ```
 
-## Performance measures
+## Perf
+
+### Performance measures
 
 To take performance measures you can use th perf tool like this:
 ```sh
@@ -73,3 +88,17 @@ perf report -g 'graph,0.5,caller'
 ```
 
 You will need a debug build for that, else you won't have debug symbols.
+
+### Time measures
+
+You can use the hyperfine tool to measure the time of execution of the program.
+
+If you use `nix build`:
+```sh
+hyperfine "./result/bin/Zaytracer" --warmup 10
+```
+
+or if you use `zig build -Doptimize=ReleaseFast`:
+```sh
+hyperfine "./zig-out/bin/Zaytracer" --warmup 10
+```
