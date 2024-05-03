@@ -37,12 +37,18 @@ zig build
 
 ### :rocket: <samp>Running</samp>
 
+#### With `zig build` or `zig build -Doptimize=ReleaseFast`
 
-```shell
+```sh
 # It will build the project and run it. (do nothing if the project is already built)
 zig build run
 # or you can run the executable directly
 ./zig-out/bin/Zaytracer
+```
+#### With `nix build`
+
+```
+./result/bin/Zaytracer
 ```
 
 ### :heavy_plus_sign: <samp>Using direnv</samp>
