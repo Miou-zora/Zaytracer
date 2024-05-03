@@ -16,7 +16,7 @@
 ### :wrench: <samp>Setup</samp>
 
 Clone this repository and run `nix develop` to enter the development environment
-```shell
+```sh
 git clone https://github.com/Miou-zora/Zaytracer.git
 cd Zaytracer
 nix develop
@@ -24,7 +24,14 @@ nix develop
 
 ### :construction_worker: <samp>Building</samp>
 
-```shell
+#### Release
+```sh
+zig build -Doptimize=ReleaseFast
+# or
+nix build
+```
+#### Debug
+```sh
 zig build
 ```
 
