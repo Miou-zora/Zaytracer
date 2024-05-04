@@ -13,10 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: cachix/install-nix-action@v26
         with:
-          version: 0.12.0
-      - run: zig build --summary all
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - run: nix build
   test:
     strategy:
       matrix:
@@ -25,16 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: cachix/install-nix-action@v26
         with:
-          version: 0.12.0
-      - run: zig build test --summary all
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - run: zig build test
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: cachix/install-nix-action@v26
         with:
-          version: 0.12.0
+          nix_path: nixpkgs=channel:nixos-unstable
+
       - run: zig fmt --check .
