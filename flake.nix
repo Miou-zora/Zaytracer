@@ -5,37 +5,43 @@
     zig-overlay.url = "github:mitchellh/zig-overlay";
   };
   outputs = { self, nixpkgs, flake-utils, zig-overlay }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
-      let
-        # Refer to https://github.com/mitchellh/zig-overlay if you want to use a specific version of Zig
-        zigPackage = zig-overlay.packages.${system}.default;
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        formatter = pkgs.nixpkgs-fmt;
-        devShells.default = pkgs.mkShell {
-          name = "Zaytracer";
-          nativeBuildInputs = [
-            zigPackage
-            pkgs.linuxPackages_latest.perf
-            pkgs.ffmpeg
-            pkgs.hyperfine
-          ];
-        };
-        packages.default = pkgs.stdenv.mkDerivation {
-          name = "Zaytracer";
-          src = ./.;
+    flake-utils.lib.eachSystem [
+      "aarch64-darwin"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "x86_64-linux"
+    ]
+      (system:
+        let
+          # Refer to https://github.com/mitchellh/zig-overlay if you want to use a specific version of Zig
+          zigPackage = zig-overlay.packages.${system}.default;
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          formatter = pkgs.nixpkgs-fmt;
+          devShells.default = pkgs.mkShell {
+            name = "Zaytracer";
+            nativeBuildInputs = [
+              zigPackage
+              pkgs.linuxPackages_latest.perf
+              pkgs.ffmpeg
+              pkgs.hyperfine
+            ];
+          };
+          packages.default = pkgs.stdenv.mkDerivation {
+            name = "Zaytracer";
+            src = ./.;
 
-          XDG_CACHE_HOME = "${placeholder "out"}";
+            XDG_CACHE_HOME = "${placeholder "out"}";
 
-          buildPhase = ''
-            ${zigPackage}/bin/zig build -Doptimize=ReleaseFast
-          '';
+            buildPhase = ''
+              ${zigPackage}/bin/zig build -Doptimize=ReleaseFast
+            '';
 
-          installPhase = ''
-            ${zigPackage}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
-            rm -rf $out/zig # remove cache
-          '';
-        };
-      });
+            installPhase = ''
+              ${zigPackage}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
+              rm -rf $out/zig # remove cache
+            '';
+          };
+        });
 }
