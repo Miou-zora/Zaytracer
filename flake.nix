@@ -4,35 +4,41 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        formatter = pkgs.nixpkgs-fmt;
-        devShells.default = pkgs.mkShell {
-          name = "Zaytracer";
-          nativeBuildInputs = [
-            pkgs.zig_0_12
-            pkgs.linuxPackages_latest.perf
-            pkgs.ffmpeg
-            pkgs.hyperfine
-          ];
-        };
-        packages.default = pkgs.stdenv.mkDerivation {
-          name = "Zaytracer";
-          src = ./.;
+    flake-utils.lib.eachSystem [
+      "aarch64-darwin"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "x86_64-linux"
+    ]
+      (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          formatter = pkgs.nixpkgs-fmt;
+          devShells.default = pkgs.mkShell {
+            name = "Zaytracer";
+            nativeBuildInputs = [
+              pkgs.zig_0_12
+              pkgs.linuxPackages_latest.perf
+              pkgs.ffmpeg
+              pkgs.hyperfine
+            ];
+          };
+          packages.default = pkgs.stdenv.mkDerivation {
+            name = "Zaytracer";
+            src = ./.;
 
-          XDG_CACHE_HOME = "${placeholder "out"}";
+            XDG_CACHE_HOME = "${placeholder "out"}";
 
-          buildPhase = ''
-            ${pkgs.zig_0_12}/bin/zig build -Doptimize=ReleaseFast
-          '';
+            buildPhase = ''
+              ${pkgs.zig_0_12}/bin/zig build -Doptimize=ReleaseFast
+            '';
 
-          installPhase = ''
-            ${pkgs.zig_0_12}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
-            rm -rf $out/zig # remove cache
-          '';
-        };
-      });
+            installPhase = ''
+              ${pkgs.zig_0_12}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
+              rm -rf $out/zig # remove cache
+            '';
+          };
+        });
 }
