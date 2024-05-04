@@ -2,9 +2,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    zig-overlay.url = "github:mitchellh/zig-overlay";
   };
-  outputs = { self, nixpkgs, flake-utils, zig-overlay }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachSystem [
       "aarch64-darwin"
       "aarch64-linux"
@@ -13,8 +12,6 @@
     ]
       (system:
         let
-          # Refer to https://github.com/mitchellh/zig-overlay if you want to use a specific version of Zig
-          zigPackage = zig-overlay.packages.${system}.default;
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
@@ -22,7 +19,7 @@
           devShells.default = pkgs.mkShell {
             name = "Zaytracer";
             nativeBuildInputs = [
-              zigPackage
+              pkgs.zig_0_12
               pkgs.linuxPackages_latest.perf
               pkgs.ffmpeg
               pkgs.hyperfine
@@ -35,11 +32,11 @@
             XDG_CACHE_HOME = "${placeholder "out"}";
 
             buildPhase = ''
-              ${zigPackage}/bin/zig build -Doptimize=ReleaseFast
+              ${pkgs.zig_0_12}/bin/zig build -Doptimize=ReleaseFast
             '';
 
             installPhase = ''
-              ${zigPackage}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
+              ${pkgs.zig_0_12}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
               rm -rf $out/zig # remove cache
             '';
           };
