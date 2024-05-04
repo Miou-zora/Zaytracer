@@ -13,6 +13,10 @@ const Transformation = @import("Transformation.zig").Transformation;
 const Translation = @import("Translation.zig").Translation;
 const Rotation = @import("Rotation.zig").Rotation;
 const Vertex = @import("Vertex.zig").Vertex;
+const Image = Scene.Image;
+const rl = @cImport({
+    @cInclude("raylib.h");
+});
 
 const TransformationProxy = struct {
     translation: ?Translation = null,
@@ -42,6 +46,7 @@ const ObjectProxy = struct {
         va: Vertex,
         vb: Vertex,
         vc: Vertex,
+        textIdx: usize,
     } = null,
 };
 
@@ -50,11 +55,16 @@ const LightProxy = struct {
     point: ?PointLight = null,
 };
 
+const AssetProxy = struct {
+    imageName: [:0]const u8,
+};
+
 const ConfigProxy = struct {
     camera: Camera,
     materials: []Material,
     objects: []ObjectProxy,
     lights: []LightProxy,
+    assets: []AssetProxy,
 };
 
 fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation {
@@ -73,6 +83,11 @@ fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation
 pub const Config = struct {
     const Self = @This();
 
+    camera: Camera,
+    objects: []Object,
+    lights: []Light,
+    assets: []Image,
+
     pub fn fromFilePath(path: []const u8, allocator: std.mem.Allocator) !Self {
         // TODO: Check if there is a better way to do that
         // Cause right now it looks a little bit silly :3
@@ -90,7 +105,15 @@ pub const Config = struct {
             .camera = proxy.camera,
             .objects = try allocator.alloc(Object, proxy.objects.len),
             .lights = try allocator.alloc(Light, proxy.lights.len),
+            .assets = try allocator.alloc(Image, proxy.assets.len),
         };
+        for (proxy.assets, 0..) |obj, i| {
+            const image = rl.LoadImage(obj.imageName);
+            conf.assets[i] = Image{
+                .rlImage = image,
+                .rlColors = rl.LoadImageColors(image),
+            };
+        }
         for (proxy.objects, 0..) |obj, i| {
             if (obj.sphere) |item| {
                 conf.objects[i] = Object{ .sphere = .{
@@ -118,6 +141,7 @@ pub const Config = struct {
                     .va = item.va,
                     .vb = item.vb,
                     .vc = item.vc,
+                    .text = &conf.assets[item.textIdx],
                 } };
             } else {
                 unreachable;
@@ -134,8 +158,4 @@ pub const Config = struct {
         }
         return conf;
     }
-
-    camera: Camera,
-    objects: []Object,
-    lights: []Light,
 };

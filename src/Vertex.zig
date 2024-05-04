@@ -6,7 +6,5 @@ pub const Vertex = struct {
     const Self = @This();
 
     position: Pt3,
-    color: ColorRGB,
-    // normal: Vec3,
-    // texCoord: Vec2, // TODO: have Vec2 (or VecX (useful for quaternion))
+    texCoord: @Vector(2, f32),
 };

@@ -7,6 +7,9 @@ const Plane = @import("Plane.zig").Plane;
 const Transformation = @import("Transformation.zig").Transformation;
 const std = @import("std");
 const Triangle = @import("Triangle.zig").Triangle;
+const rl = @cImport({
+    @cInclude("raylib.h");
+});
 
 pub const SceneObject = union(enum) {
     sphere: Sphere,
@@ -18,6 +21,15 @@ pub const SceneObject = union(enum) {
 pub const SceneLight = union(enum) {
     point_light: Light,
     ambient_light: AmbientLight,
+};
+
+pub const Image = struct {
+    rlImage: rl.Image,
+    rlColors: [*]rl.Color,
+};
+
+pub const Asset = union(enum) {
+    image: Image,
 };
 
 pub const Scene = struct {

@@ -3,6 +3,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
+
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachSystem [
       "aarch64-darwin"
@@ -18,11 +19,12 @@
           formatter = pkgs.nixpkgs-fmt;
           devShells.default = pkgs.mkShell {
             name = "Zaytracer";
-            nativeBuildInputs = [
-              pkgs.zig_0_12
-              pkgs.linuxPackages_latest.perf
-              pkgs.ffmpeg
-              pkgs.hyperfine
+            nativeBuildInputs = with pkgs; [
+              zig_0_12
+              linuxPackages_latest.perf
+              ffmpeg
+              hyperfine
+              raylib
             ];
           };
           packages.default = pkgs.stdenv.mkDerivation {
@@ -30,7 +32,8 @@
             src = ./.;
 
             XDG_CACHE_HOME = "${placeholder "out"}";
-
+            
+            buildInputs = [ pkgs.raylib ];
             buildPhase = ''
               ${pkgs.zig_0_12}/bin/zig build -Doptimize=ReleaseFast
             '';
