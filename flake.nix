@@ -29,6 +29,7 @@
 
           XDG_CACHE_HOME = "${placeholder "out"}";
 
+          buildInputs = [ pkgs.raylib ];
           buildPhase = ''
             ${zigPackage}/bin/zig build -Doptimize=ReleaseFast
           '';
