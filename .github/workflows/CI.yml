@@ -8,7 +8,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - run: zig build test
+      - run: nix develop -c zig build test
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -40,4 +40,4 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - run: zig fmt --check .
+      - run: nix develop -c zig fmt --check .
