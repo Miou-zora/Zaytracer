@@ -20,6 +20,7 @@
             pkgs.linuxPackages_latest.perf
             pkgs.ffmpeg
             pkgs.hyperfine
+            pkgs.raylib
           ];
         };
         packages.default = pkgs.stdenv.mkDerivation {

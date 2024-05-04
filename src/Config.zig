@@ -13,6 +13,9 @@ const Transformation = @import("Transformation.zig").Transformation;
 const Translation = @import("Translation.zig").Translation;
 const Rotation = @import("Rotation.zig").Rotation;
 const Vertex = @import("Vertex.zig").Vertex;
+const rl = @cImport({
+    @cInclude("raylib.h");
+});
 
 const TransformationProxy = struct {
     translation: ?Translation = null,
@@ -114,10 +117,13 @@ pub const Config = struct {
                     .transform = transform_proxy_to_transform(item.transform),
                 } };
             } else if (obj.triangle) |item| {
+                const image = rl.LoadImage("megu.png");
                 conf.objects[i] = Object{ .triangle = .{
                     .va = item.va,
                     .vb = item.vb,
                     .vc = item.vc,
+                    .image = image,
+                    .imageColor = rl.LoadImageColors(image),
                 } };
             } else {
                 unreachable;

@@ -3,6 +3,10 @@ const Ray = @import("Ray.zig").Ray;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
+const std = @import("std");
+const rl = @cImport({
+    @cInclude("raylib.h");
+});
 
 pub const Triangle = struct {
     const Self = @This();
@@ -10,6 +14,8 @@ pub const Triangle = struct {
     va: Vertex,
     vb: Vertex,
     vc: Vertex,
+    imageColor: [*]rl.Color,
+    image: rl.Image,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         // TODO: add bvh + compute this only one time
@@ -39,14 +45,24 @@ pub const Triangle = struct {
             return HitRecord.nil();
         }
 
-        const colorVA = (Vec3{ .x = self.va.color.r, .y = self.va.color.g, .z = self.va.color.b }).normalized();
-        const colorVB = (Vec3{ .x = self.vb.color.r, .y = self.vb.color.g, .z = self.vb.color.b }).normalized();
-        const colorVC = (Vec3{ .x = self.vc.color.r, .y = self.vc.color.g, .z = self.vc.color.b }).normalized();
-        const color = colorVA.mulf32(u).addVec3(colorVB.mulf32(v)).addVec3(colorVC.mulf32(w)).mulf32(255).divf32(u + v + w);
-        const colorRGB = .{ .r = color.x, .g = color.y, .b = color.z };
+        const texCordA: @Vector(2, f32) = .{ 1, 1 };
+        const texCordB: @Vector(2, f32) = .{ 0, 1 };
+        const texCordC: @Vector(2, f32) = .{ 0.5, 0 };
+        const posInImage: @Vector(2, usize) = .{
+            @as(usize, @intFromFloat((u * texCordA[0] + v * texCordB[0] + w * texCordC[0]) / (u + v + w) * @as(f32, @floatFromInt(self.image.width)))),
+            @as(usize, @intFromFloat((u * texCordA[1] + v * texCordB[1] + w * texCordC[1]) / (u + v + w) * @as(f32, @floatFromInt(self.image.height)))),
+        };
+        const cInt_to_usize = @as(usize, @intCast(self.image.width));
+        const color: rl.Color = self.imageColor[posInImage[1] * cInt_to_usize + posInImage[0]];
+        const colorRGB = .{
+            .r = @as(f32, @floatFromInt(color.r)),
+            .g = @as(f32, @floatFromInt(color.g)),
+            .b = @as(f32, @floatFromInt(color.b)),
+        };
+
         const material: Material = .{
             .color = colorRGB,
-            .reflective = 0.5,
+            .reflective = 0.9,
             .specular = 0,
         };
         return HitRecord{
