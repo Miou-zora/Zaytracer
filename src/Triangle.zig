@@ -4,6 +4,7 @@ const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const std = @import("std");
+const Image = @import("Scene.zig").Image;
 const rl = @cImport({
     @cInclude("raylib.h");
 });
@@ -14,8 +15,7 @@ pub const Triangle = struct {
     va: Vertex,
     vb: Vertex,
     vc: Vertex,
-    imageColor: [*]rl.Color,
-    image: rl.Image,
+    text: *const Image,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         // TODO: add bvh + compute this only one time
@@ -45,15 +45,12 @@ pub const Triangle = struct {
             return HitRecord.nil();
         }
 
-        const texCordA: @Vector(2, f32) = .{ 1, 1 };
-        const texCordB: @Vector(2, f32) = .{ 0, 1 };
-        const texCordC: @Vector(2, f32) = .{ 0.5, 0 };
         const posInImage: @Vector(2, usize) = .{
-            @as(usize, @intFromFloat((u * texCordA[0] + v * texCordB[0] + w * texCordC[0]) / (u + v + w) * @as(f32, @floatFromInt(self.image.width)))),
-            @as(usize, @intFromFloat((u * texCordA[1] + v * texCordB[1] + w * texCordC[1]) / (u + v + w) * @as(f32, @floatFromInt(self.image.height)))),
+            @as(usize, @intFromFloat((u * self.va.texCoord[0] + v * self.vb.texCoord[0] + w * self.vc.texCoord[0]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
+            @as(usize, @intFromFloat((u * self.va.texCoord[1] + v * self.vb.texCoord[1] + w * self.vc.texCoord[1]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
         };
-        const cInt_to_usize = @as(usize, @intCast(self.image.width));
-        const color: rl.Color = self.imageColor[posInImage[1] * cInt_to_usize + posInImage[0]];
+        const cInt_to_usize = @as(usize, @intCast(self.text.rlImage.width));
+        const color: rl.Color = self.text.rlColors[posInImage[1] * cInt_to_usize + posInImage[0]];
         const colorRGB = .{
             .r = @as(f32, @floatFromInt(color.r)),
             .g = @as(f32, @floatFromInt(color.g)),
@@ -62,7 +59,7 @@ pub const Triangle = struct {
 
         const material: Material = .{
             .color = colorRGB,
-            .reflective = 0.9,
+            .reflective = 0.75,
             .specular = 0,
         };
         return HitRecord{
