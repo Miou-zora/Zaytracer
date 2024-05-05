@@ -13,20 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # submodules: 'true'
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: cachix/install-nix-action@v26
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - run: nix build '.?submodules=1'
+      - run: nix build
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: 'true'
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: cachix/install-nix-action@v26
         with:
           nix_path: nixpkgs=channel:nixos-unstable
@@ -37,7 +35,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: 'true'
           fetch-depth: 0
       - uses: cachix/install-nix-action@v26
         with:
