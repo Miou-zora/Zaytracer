@@ -23,6 +23,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const zmath = b.dependency("zmath", .{});
+    exe.root_module.addImport("zmath", zmath.module("root"));
     exe.linkSystemLibrary("raylib");
     exe.linkLibC();
 

@@ -229,6 +229,10 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
+    const zmath = @import("zmath");
+
+    _ = zmath.f32x4(0, 0, 0, 0);
+
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
