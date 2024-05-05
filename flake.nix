@@ -19,16 +19,15 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
-        {
+        rec {
           formatter = pkgs.nixpkgs-fmt;
           devShells.default = pkgs.mkShell {
             name = "Zaytracer";
+            inputsFrom = pkgs.lib.attrsets.attrValues packages;
             nativeBuildInputs = with pkgs; [
-              zig_0_12
               linuxPackages_latest.perf
               ffmpeg
               hyperfine
-              raylib
             ];
           };
 
