@@ -19,7 +19,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - run: nix build
+      - run: nix build '.?submodules=1'
   test:
     runs-on: ubuntu-latest
     steps:
