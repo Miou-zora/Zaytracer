@@ -37,7 +37,8 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "zig-gamedev": "zig-gamedev"
       }
     },
     "systems": {
@@ -52,6 +53,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "zig-gamedev": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1714674083,
+        "narHash": "sha256-dtW9EqC2nSSerHhJp/1V7+8//IF+SOvImiZzPFA6Wc8=",
+        "owner": "zig-gamedev",
+        "repo": "zig-gamedev",
+        "rev": "a6568e0d73d6d5944303bb87b6d69de91acac2d8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zig-gamedev",
+        "repo": "zig-gamedev",
         "type": "github"
       }
     }
