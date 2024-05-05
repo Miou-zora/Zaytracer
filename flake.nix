@@ -31,13 +31,16 @@
               raylib
             ];
           };
-        packages.default = pkgs.stdenv.mkDerivation {
+
+          packages.default = pkgs.stdenv.mkDerivation {
             name = "Zaytracer";
             src = ./.;
 
             XDG_CACHE_HOME = "${placeholder "out"}";
-            
+
             prePatch = ''
+              mkdir -p libs
+
               cp -r ${zig-gamedev} libs/zgamedev
             '';
 
@@ -50,7 +53,7 @@
               ${pkgs.zig_0_12}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
               rm -rf $out/zig # remove cache
             '';
-            
+
           };
         });
 }
