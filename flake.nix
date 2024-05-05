@@ -61,8 +61,7 @@
             hyperfine
           ]
           ++ (pkgs.lib.optionals
-            pkgs.stdenv.isLinux
-            [linuxPackages_latest.perf]);
+            pkgs.stdenv.isLinux [linuxPackages_latest.perf]);
       };
 
       packages.default = pkgs.stdenv.mkDerivation {

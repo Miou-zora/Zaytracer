@@ -3,30 +3,32 @@ const Rotation = @import("Rotation.zig").Rotation;
 const Ray = @import("Ray.zig").Ray;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Cylinder = @import("Cylinder.zig").Cylinder;
+const Pt3 = @import("Pt3.zig").Pt3;
 
 pub const Transformation = union(enum) {
+    const Self = @This();
     translation: Translation,
     rotation: Rotation,
+
+    pub inline fn ray_global_to_object(self: *const Self, ray: *const Ray, origin: *const Pt3) Ray {
+        switch (self.*) {
+            .translation => |value| {
+                return value.ray_global_to_object(ray);
+            },
+            .rotation => |value| {
+                return value.ray_global_to_object(ray, origin);
+            },
+        }
+    }
+
+    pub inline fn hitRecord_object_to_global(self: *const Self, ray: HitRecord, origin: *const Pt3) HitRecord {
+        switch (self.*) {
+            .translation => |value| {
+                return value.hitRecord_object_to_global(&ray);
+            },
+            .rotation => |value| {
+                return value.hitRecord_object_to_global(&ray, origin);
+            },
+        }
+    }
 };
-
-pub fn ray_global_to_object(ray: Ray, transformation: Transformation, object: Cylinder) Ray {
-    switch (transformation) {
-        Transformation.translation => |value| {
-            return value.ray_global_to_object(ray);
-        },
-        Transformation.rotation => |value| {
-            return value.ray_global_to_object(ray, object);
-        },
-    }
-}
-
-pub fn hitRecord_object_to_global(ray: HitRecord, transformation: Transformation, object: Cylinder) HitRecord {
-    switch (transformation) {
-        Transformation.translation => |value| {
-            return value.hitRecord_object_to_global(ray);
-        },
-        Transformation.rotation => |value| {
-            return value.hitRecord_object_to_global(ray, object);
-        },
-    }
-}
