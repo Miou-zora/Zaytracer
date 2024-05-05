@@ -71,15 +71,12 @@
 
         XDG_CACHE_HOME = "${placeholder "out"}";
 
-        prePatch = ''
-          mkdir -p libs
-
-          cp -r ${zig-gamedev} libs/zgamedev
-        '';
-
         buildInputs = [pkgs.raylib];
         nativeBuildInputs = [zig];
         buildPhase = ''
+          mkdir -p libs
+
+          cp -r ${zig-gamedev} libs/zgamedev
           zig build -Doptimize=ReleaseFast
         '';
 
