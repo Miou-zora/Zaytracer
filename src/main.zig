@@ -65,60 +65,17 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
     };
 }
 
+//.triangle => |item| {
+//    const record = item.hits(ray);
+//    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+//        closest_hit = record;
+//    }
+//}
+
 fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
     var closest_hit: HitRecord = HitRecord.nil();
-    for (scene.objects.items) |object| {
-        switch (object) {
-            .cylinder => |item| {
-                if (item.transform) |transform| {
-                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
-                    const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .sphere => |item| {
-                if (item.transform) |transform| {
-                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
-                    const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .plane => |item| {
-                if (item.transform) |transform| {
-                    const new_ray = transform.ray_global_to_object(&ray, &item.origin);
-                    const record = transform.hitRecord_object_to_global(item.hits(new_ray), &item.origin);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .triangle => |item| {
-                const record = item.hits(ray);
-                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                    closest_hit = record;
-                }
-            },
-        }
-    }
+    for (scene.objects.items) |object|
+        object.fetch_closest_object(&closest_hit, &ray, t_min, t_max);
     return closest_hit;
 }
 
