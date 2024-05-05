@@ -65,17 +65,10 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
     };
 }
 
-//.triangle => |item| {
-//    const record = item.hits(ray);
-//    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-//        closest_hit = record;
-//    }
-//}
-
 fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
     var closest_hit: HitRecord = HitRecord.nil();
     for (scene.objects.items) |object|
-        object.fetch_closest_object(&closest_hit, &ray, t_min, t_max);
+        object.fetch_closest_object(&closest_hit, ray, t_min, t_max);
     return closest_hit;
 }
 
