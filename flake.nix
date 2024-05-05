@@ -72,10 +72,15 @@
 
         buildInputs = [pkgs.raylib];
         nativeBuildInputs = [zig];
-        buildPhase = ''
+
+        prePatch = ''
           mkdir -p libs
 
+          rm -rf libs/zgamedev
           cp -r ${zig-gamedev} libs/zgamedev
+        '';
+
+        buildPhase = ''
           zig build -Doptimize=ReleaseFast
         '';
 
