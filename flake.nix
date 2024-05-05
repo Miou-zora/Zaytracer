@@ -55,11 +55,14 @@
 
         name = "Zaytracer";
         inputsFrom = pkgs.lib.attrsets.attrValues packages;
-        packages = with pkgs; [
-          linuxPackages_latest.perf
-          ffmpeg
-          hyperfine
-        ];
+        packages = with pkgs;
+          [
+            ffmpeg
+            hyperfine
+          ]
+          ++ (pkgs.lib.optionals
+            pkgs.stdenv.isLinux
+            [linuxPackages_latest.perf]);
       };
 
       packages.default = pkgs.stdenv.mkDerivation {
