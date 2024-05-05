@@ -32,28 +32,34 @@
             ];
           };
 
-          packages.default = pkgs.stdenv.mkDerivation {
-            name = "Zaytracer";
-            src = ./.;
+          packages.default =
+            pkgs.stdenv.mkDerivation {
+              name = "Zaytracer";
+              src = ./.;
 
-            XDG_CACHE_HOME = "${placeholder "out"}";
+              XDG_CACHE_HOME = "${placeholder "out"}";
 
-            prePatch = ''
-              mkdir -p libs
+              prePatch = ''
+                mkdir -p libs
 
-              cp -r ${zig-gamedev} libs/zgamedev
-            '';
+                cp -r ${zig-gamedev} libs/zgamedev
+              '';
 
-            buildInputs = [ pkgs.raylib ];
-            buildPhase = ''
-              ${pkgs.zig_0_12}/bin/zig build -Doptimize=ReleaseFast
-            '';
+              buildInputs = [ pkgs.raylib ];
+              nativeBuildInputs = [ pkgs.zig_0_12 ];
+              buildPhase = ''
+                zig build -Doptimize=ReleaseFast
+              '';
 
-            installPhase = ''
-              ${pkgs.zig_0_12}/bin/zig build install --prefix $out -Doptimize=ReleaseFast
-              rm -rf $out/zig # remove cache
-            '';
+              doCheck = true;
+              checkPhase = ''
+                zig build test --summary all
+              '';
 
-          };
+              installPhase = ''
+                zig build install --prefix $out -Doptimize=ReleaseFast
+                rm -rf $out/zig # remove cache
+              '';
+            };
         });
 }
