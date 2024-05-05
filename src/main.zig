@@ -67,91 +67,8 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
 
 fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
     var closest_hit: HitRecord = HitRecord.nil();
-    for (scene.objects.items) |object| {
-        switch (object) {
-            .cylinder => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .sphere => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .plane => |item| {
-                if (item.transform) |transform| {
-                    switch (transform) {
-                        .translation => |translation| {
-                            const new_ray = translation.ray_global_to_object(ray);
-                            const record = translation.hitRecord_object_to_global(item.hits(new_ray));
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                        .rotation => |rotation| {
-                            const new_ray = rotation.ray_global_to_object(ray, item.origin);
-                            const record = rotation.hitRecord_object_to_global(item.hits(new_ray), item.origin);
-                            if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                                closest_hit = record;
-                            }
-                        },
-                    }
-                } else {
-                    const record = item.hits(ray);
-                    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                        closest_hit = record;
-                    }
-                }
-            },
-            .triangle => |item| {
-                const record = item.hits(ray);
-                if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-                    closest_hit = record;
-                }
-            },
-        }
-    }
+    for (scene.objects.items) |object|
+        object.fetch_closest_object(&closest_hit, ray, t_min, t_max);
     return closest_hit;
 }
 
@@ -229,6 +146,37 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
+    // const Object = @import("Object.zig").Object;
+    // const ObjSphere: Object = .{
+    //     .shape = Object.Shape{
+    //         .sphere = .{
+    //             .origin = .{
+    //                 .x = 0,
+    //                 .y = 0,
+    //                 .z = 0,
+    //             },
+    //             .radius = 1,
+    //             .material = Material{
+    //                 .color = ColorRGB{ .r = 255, .g = 0, .b = 0 },
+    //                 .reflective = 0.5,
+    //                 .specular = 500,
+    //             },
+    //             .transform = null,
+    //         },
+    //     },
+    //     .transform = null,
+    // };
+
+    // comptime {
+    //     const rayToSphere = Ray{
+    //         .direction = Vec3{ .x = 0, .y = 0, .z = -1 },
+    //         .origin = Vec3{ .x = 0, .y = 0, .z = 2 },
+    //     };
+    //     const hit = ObjSphere.hits(rayToSphere);
+    //     _ = hit;
+    //     _ = ObjSphere.getOrigin();
+    // }
+
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
