@@ -25,6 +25,7 @@
               ffmpeg
               hyperfine
               raylib
+              valgrind
             ];
           };
           packages.default = pkgs.stdenv.mkDerivation {
