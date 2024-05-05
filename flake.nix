@@ -2,6 +2,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zig-gamedev = {
       url = "github:zig-gamedev/zig-gamedev";
       flake = false;
@@ -12,6 +18,7 @@
     self,
     nixpkgs,
     flake-utils,
+    pre-commit-hooks,
     zig-gamedev,
   }:
     flake-utils.lib.eachSystem [
@@ -22,12 +29,33 @@
     ]
     (system: let
       pkgs = nixpkgs.legacyPackages.${system};
+
+      zig = pkgs.zig_0_12;
     in rec {
       formatter = pkgs.alejandra;
+
+      checks = let
+        hooks = {
+          alejandra.enable = true;
+          zig-fmt = {
+            enable = true;
+            entry = "${zig}/bin/zig fmt --check .";
+            files = "\\.z(ig|on)$";
+          };
+        };
+      in {
+        pre-commit-check = pre-commit-hooks.lib.${system}.run {
+          inherit hooks;
+          src = ./.;
+        };
+      };
+
       devShells.default = pkgs.mkShell {
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+
         name = "Zaytracer";
         inputsFrom = pkgs.lib.attrsets.attrValues packages;
-        nativeBuildInputs = with pkgs; [
+        packages = with pkgs; [
           linuxPackages_latest.perf
           ffmpeg
           hyperfine
@@ -47,7 +75,7 @@
         '';
 
         buildInputs = [pkgs.raylib];
-        nativeBuildInputs = [pkgs.zig_0_12];
+        nativeBuildInputs = [zig];
         buildPhase = ''
           zig build -Doptimize=ReleaseFast
         '';

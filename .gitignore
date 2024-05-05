@@ -10,3 +10,6 @@ zig-out/
 # Output
 output.ppm
 out.*
+
+# pre-commit config
+.pre-commit-config.yaml
