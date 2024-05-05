@@ -62,6 +62,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    exe_unit_tests.root_module.addImport("zmath", zmath.module("root"));
     exe_unit_tests.linkSystemLibrary("raylib");
     exe_unit_tests.linkLibC();
 
