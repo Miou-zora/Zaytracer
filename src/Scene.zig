@@ -60,7 +60,7 @@ pub const SceneObject = union(enum) {
                 fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
             },
             .cylinder => |item| {
-                fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
+                fetch_closest_object_with_custom_transform(item, current_closest_hit, ray, t_min, t_max);
             },
             .triangle => |item| {
                 fetch_closest_object_with_custom_transform(item, current_closest_hit, ray, t_min, t_max);

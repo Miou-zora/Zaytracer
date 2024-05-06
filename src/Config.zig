@@ -40,7 +40,7 @@ const ObjectProxy = struct {
         origin: Pt3,
         radius: f32,
         material: usize,
-        transform: ?TransformationProxy = null,
+        transforms: ?[]CustomTransformProxy = null,
     } = null,
     triangle: ?struct {
         va: Vertex,
@@ -94,7 +94,7 @@ const CustomTransformProxy = struct {
     } = null,
 };
 
-const CustomTransform = @import("Triangle.zig").Transform;
+const CustomTransform = @import("tmpTransform.zig").Transform;
 
 fn custom_transform_proxy_to_custom_transform(transforms: []CustomTransformProxy) CustomTransform {
     var custom_transform = CustomTransform{};
@@ -160,12 +160,20 @@ pub const Config = struct {
                     .transform = transform_proxy_to_transform(item.transform),
                 } };
             } else if (obj.cylinder) |item| {
-                conf.objects[i] = Object{ .cylinder = .{
-                    .origin = item.origin,
-                    .radius = item.radius,
-                    .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
-                } };
+                if (item.transforms) |trs| {
+                    conf.objects[i] = Object{ .cylinder = .{
+                        .origin = item.origin,
+                        .radius = item.radius,
+                        .material = proxy.materials[item.material],
+                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                    } };
+                } else {
+                    conf.objects[i] = Object{ .cylinder = .{
+                        .origin = item.origin,
+                        .radius = item.radius,
+                        .material = proxy.materials[item.material],
+                    } };
+                }
             } else if (obj.triangle) |item| {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{ .triangle = .{

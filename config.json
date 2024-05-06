@@ -58,13 +58,15 @@
                 },
                 "radius": 0.5,
                 "material": 3,
-                "transform": {
-                    "rotation": {
-                        "x": -0.3,
-                        "y": 0,
-                        "z": 0
+                "transforms": [
+                    {
+                        "rotation": {
+                            "pitch": 0.2,
+                            "yaw": 0,
+                            "roll": 0
+                        }
                     }
-                }
+                ]
             }
         },
         {
@@ -103,8 +105,8 @@
                 "transforms": [
                     {
                         "rotation": {
-                            "pitch": 0.2,
-                            "yaw": 1.5,
+                            "pitch": 0,
+                            "yaw": 1.1,
                             "roll": 0
                         }
                     },
