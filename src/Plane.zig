@@ -4,7 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
-const Transformation = @import("Transformation.zig").Transformation;
+const Transform = @import("tmpTransform.zig").Transform;
 
 pub const Plane = struct {
     const Self = @This();
@@ -12,7 +12,7 @@ pub const Plane = struct {
     normal: Vec3,
     origin: Pt3,
     material: Material,
-    transform: ?Transformation,
+    transform: ?Transform = null,
 
     pub fn deinit(self: *Self) void {
         self.transform.deinit();

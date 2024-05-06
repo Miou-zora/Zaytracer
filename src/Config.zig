@@ -34,7 +34,7 @@ const ObjectProxy = struct {
         normal: Vec3,
         origin: Pt3,
         material: usize,
-        transform: ?TransformationProxy = null,
+        transforms: ?[]CustomTransformProxy = null,
     } = null,
     cylinder: ?struct {
         origin: Pt3,
@@ -153,12 +153,20 @@ pub const Config = struct {
                     .transform = transform_proxy_to_transform(item.transform),
                 } };
             } else if (obj.plane) |item| {
-                conf.objects[i] = Object{ .plane = .{
-                    .origin = item.origin,
-                    .normal = item.normal,
-                    .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
-                } };
+                if (item.transforms) |trs| {
+                    conf.objects[i] = Object{ .plane = .{
+                        .origin = item.origin,
+                        .normal = item.normal,
+                        .material = proxy.materials[item.material],
+                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                    } };
+                } else {
+                    conf.objects[i] = Object{ .plane = .{
+                        .origin = item.origin,
+                        .normal = item.normal,
+                        .material = proxy.materials[item.material],
+                    } };
+                }
             } else if (obj.cylinder) |item| {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{ .cylinder = .{
