@@ -28,10 +28,18 @@ fn fetch_closest_object_with_transform(T: type, obj: T, closest_hit: *HitRecord,
     }
 }
 
-fn fetch_closest_object_without_transform(T: type, obj: T, closest_hit: *HitRecord, ray: Ray, t_min: f32, t_max: f32) void {
-    const record = obj.hits(ray);
-    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-        closest_hit.* = record;
+fn fetch_closest_object_with_custom_transform(T: type, obj: T, closest_hit: *HitRecord, ray: Ray, t_min: f32, t_max: f32) void {
+    if (obj.transform) |transform| {
+        const new_ray = transform.ray_global_to_object(&ray);
+        const record = transform.hitRecord_object_to_global(obj.hits(new_ray));
+        if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+            closest_hit.* = record;
+        }
+    } else {
+        const record = obj.hits(ray);
+        if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
+            closest_hit.* = record;
+        }
     }
 }
 
@@ -55,7 +63,7 @@ pub const SceneObject = union(enum) {
                 fetch_closest_object_with_transform(Cylinder, item, current_closest_hit, ray, t_min, t_max);
             },
             .triangle => |item| {
-                fetch_closest_object_without_transform(Triangle, item, current_closest_hit, ray, t_min, t_max);
+                fetch_closest_object_with_custom_transform(Triangle, item, current_closest_hit, ray, t_min, t_max);
             },
         }
     }

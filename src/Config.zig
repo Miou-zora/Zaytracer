@@ -47,6 +47,7 @@ const ObjectProxy = struct {
         vb: Vertex,
         vc: Vertex,
         textIdx: usize,
+        transforms: ?[]CustomTransformProxy = null,
     } = null,
 };
 
@@ -78,6 +79,33 @@ fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation
         }
     }
     return null;
+}
+
+const CustomTransformProxy = struct {
+    translation: ?struct {
+        x: f32 = 0,
+        y: f32 = 0,
+        z: f32 = 0,
+    } = null,
+    rotation: ?struct {
+        x: f32 = 0,
+        y: f32 = 0,
+        z: f32 = 0,
+    } = null,
+};
+
+const CustomTransform = @import("Triangle.zig").Transform;
+
+fn custom_transform_proxy_to_custom_transform(transforms: []CustomTransformProxy) CustomTransform {
+    var custom_transform = CustomTransform{};
+    for (transforms) |tr| {
+        if (tr.translation) |t| {
+            custom_transform.translate(t.x, t.y, t.z);
+        } else {
+            unreachable;
+        }
+    }
+    return custom_transform;
 }
 
 pub const Config = struct {
@@ -137,12 +165,22 @@ pub const Config = struct {
                     .transform = transform_proxy_to_transform(item.transform),
                 } };
             } else if (obj.triangle) |item| {
-                conf.objects[i] = Object{ .triangle = .{
-                    .va = item.va,
-                    .vb = item.vb,
-                    .vc = item.vc,
-                    .text = &conf.assets[item.textIdx],
-                } };
+                if (item.transforms) |trs| {
+                    conf.objects[i] = Object{ .triangle = .{
+                        .va = item.va,
+                        .vb = item.vb,
+                        .vc = item.vc,
+                        .text = &conf.assets[item.textIdx],
+                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                    } };
+                } else {
+                    conf.objects[i] = Object{ .triangle = .{
+                        .va = item.va,
+                        .vb = item.vb,
+                        .vc = item.vc,
+                        .text = &conf.assets[item.textIdx],
+                    } };
+                }
             } else {
                 unreachable;
             }

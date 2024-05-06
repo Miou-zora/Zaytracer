@@ -99,7 +99,16 @@
                         0.5, 0
                     ]
                 },
-                "textIdx": 0
+                "textIdx": 0,
+                "transforms": [
+                    {
+                        "translation": {
+                            "x": -1,
+                            "y": 0,
+                            "z": 2
+                        }
+                    }
+                ]
             }
         }
     ],
