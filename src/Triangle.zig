@@ -20,20 +20,14 @@ pub const Transform = struct {
 
     pub fn translate(self: *Self, x: f32, y: f32, z: f32) void {
         self.mat = zmath.mul(zmath.translation(-x, -y, -z), self.mat);
-        // std.debug.print("rgto: {any}\n", .{self.mat});
         self.inv_mat = zmath.inverse(self.mat);
-        // std.debug.print("hrotg: {any}\n", .{self.inv_mat});
         self.inv_trans_mat = zmath.transpose(zmath.inverse(self.mat));
     }
 
     pub fn ray_global_to_object(self: *const Self, ray: *const Ray) Ray {
-        // Transform the ray's origin
-        // std.debug.print("rgto: {any}\n", .{self.mat});
         const zmath_origin = zmath.F32x4{ ray.origin.x, ray.origin.y, ray.origin.z, 1.0 };
         const transformed_origin = zmath.mul(zmath_origin, self.mat);
-        // std.debug.print("Matrix: {any}\nrgtobefore: {any}\nrgto: {any}\n", .{ self.mat, zmath_origin, transformed_origin });
 
-        // Transform the ray's direction (normal)
         const zmath_direction = zmath.F32x4{ ray.direction.x, ray.direction.y, ray.direction.z, 0.0 };
         const transformed_direction = zmath.mul(zmath_direction, self.inv_trans_mat);
 
@@ -52,11 +46,12 @@ pub const Transform = struct {
     }
 
     pub fn hitRecord_object_to_global(self: *const Self, ray: HitRecord) HitRecord {
-        // std.debug.print("hrotg: {any}\n", .{self.inv_mat});
         const intersection_point = zmath.F32x4{ ray.intersection_point.x, ray.intersection_point.y, ray.intersection_point.z, 1.0 };
         const transformed_intersection_point = zmath.mul(intersection_point, self.inv_mat);
+
         const normal = zmath.F32x4{ ray.normal.x, ray.normal.y, ray.normal.z, 0.0 };
         const transformed_normal = zmath.mul(normal, self.inv_mat);
+
         return HitRecord{
             .hit = ray.hit,
             .intersection_point = .{
