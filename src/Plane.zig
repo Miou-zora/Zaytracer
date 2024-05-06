@@ -4,7 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
-const Transform = @import("tmpTransform.zig").Transform;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Plane = struct {
     const Self = @This();

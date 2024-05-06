@@ -10,7 +10,7 @@ const rl = @cImport({
 });
 const zmath = @import("zmath");
 const Pt3 = @import("Pt3.zig").Pt3;
-const Transform = @import("tmpTransform.zig").Transform;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Triangle = struct {
     const Self = @This();

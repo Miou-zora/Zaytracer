@@ -9,45 +9,38 @@ const Object = Scene.SceneObject;
 const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const PointLight = @import("Light.zig").Light;
 const Light = Scene.SceneLight;
-const Transformation = @import("Transformation.zig").Transformation;
-const Translation = @import("Translation.zig").Translation;
-const Rotation = @import("Rotation.zig").Rotation;
 const Vertex = @import("Vertex.zig").Vertex;
 const Image = Scene.Image;
 const rl = @cImport({
     @cInclude("raylib.h");
 });
-
-const TransformationProxy = struct {
-    translation: ?Translation = null,
-    rotation: ?Rotation = null,
-};
+const Transform = @import("Transform.zig").Transform;
 
 const ObjectProxy = struct {
     sphere: ?struct {
         origin: Pt3,
         radius: f32,
         material: usize,
-        transform: ?TransformationProxy = null,
+        transforms: ?[]TransformProxy = null,
     } = null,
     plane: ?struct {
         normal: Vec3,
         origin: Pt3,
         material: usize,
-        transforms: ?[]CustomTransformProxy = null,
+        transforms: ?[]TransformProxy = null,
     } = null,
     cylinder: ?struct {
         origin: Pt3,
         radius: f32,
         material: usize,
-        transforms: ?[]CustomTransformProxy = null,
+        transforms: ?[]TransformProxy = null,
     } = null,
     triangle: ?struct {
         va: Vertex,
         vb: Vertex,
         vc: Vertex,
         textIdx: usize,
-        transforms: ?[]CustomTransformProxy = null,
+        transforms: ?[]TransformProxy = null,
     } = null,
 };
 
@@ -68,20 +61,7 @@ const ConfigProxy = struct {
     assets: []AssetProxy,
 };
 
-fn transform_proxy_to_transform(transform: ?TransformationProxy) ?Transformation {
-    if (transform) |t| {
-        if (t.translation) |i| {
-            return .{ .translation = i };
-        } else if (t.rotation) |i| {
-            return .{ .rotation = i };
-        } else {
-            unreachable;
-        }
-    }
-    return null;
-}
-
-const CustomTransformProxy = struct {
+const TransformProxy = struct {
     translation: ?struct {
         x: f32 = 0,
         y: f32 = 0,
@@ -94,10 +74,8 @@ const CustomTransformProxy = struct {
     } = null,
 };
 
-const CustomTransform = @import("tmpTransform.zig").Transform;
-
-fn custom_transform_proxy_to_custom_transform(transforms: []CustomTransformProxy) CustomTransform {
-    var custom_transform = CustomTransform{};
+fn transform_proxy_to_transform(transforms: []TransformProxy) Transform {
+    var custom_transform = Transform{};
     for (transforms) |tr| {
         if (tr.translation) |t| {
             custom_transform.translate(t.x, t.y, t.z);
@@ -146,19 +124,27 @@ pub const Config = struct {
         }
         for (proxy.objects, 0..) |obj, i| {
             if (obj.sphere) |item| {
-                conf.objects[i] = Object{ .sphere = .{
-                    .origin = item.origin,
-                    .radius = item.radius,
-                    .material = proxy.materials[item.material],
-                    .transform = transform_proxy_to_transform(item.transform),
-                } };
+                if (item.transforms) |trs| {
+                    conf.objects[i] = Object{ .sphere = .{
+                        .origin = item.origin,
+                        .radius = item.radius,
+                        .material = proxy.materials[item.material],
+                        .transform = transform_proxy_to_transform(trs),
+                    } };
+                } else {
+                    conf.objects[i] = Object{ .sphere = .{
+                        .origin = item.origin,
+                        .radius = item.radius,
+                        .material = proxy.materials[item.material],
+                    } };
+                }
             } else if (obj.plane) |item| {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{ .plane = .{
                         .origin = item.origin,
                         .normal = item.normal,
                         .material = proxy.materials[item.material],
-                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                        .transform = transform_proxy_to_transform(trs),
                     } };
                 } else {
                     conf.objects[i] = Object{ .plane = .{
@@ -173,7 +159,7 @@ pub const Config = struct {
                         .origin = item.origin,
                         .radius = item.radius,
                         .material = proxy.materials[item.material],
-                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                        .transform = transform_proxy_to_transform(trs),
                     } };
                 } else {
                     conf.objects[i] = Object{ .cylinder = .{
@@ -189,7 +175,7 @@ pub const Config = struct {
                         .vb = item.vb,
                         .vc = item.vc,
                         .text = &conf.assets[item.textIdx],
-                        .transform = custom_transform_proxy_to_custom_transform(trs),
+                        .transform = transform_proxy_to_transform(trs),
                     } };
                 } else {
                     conf.objects[i] = Object{ .triangle = .{

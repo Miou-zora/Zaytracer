@@ -4,8 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
-const Transformation = @import("Transformation.zig").Transformation;
-const Transform = @import("tmpTransform.zig").Transform;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Cylinder = struct {
     const Self = @This();
