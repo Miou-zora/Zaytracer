@@ -88,9 +88,9 @@ const CustomTransformProxy = struct {
         z: f32 = 0,
     } = null,
     rotation: ?struct {
-        x: f32 = 0,
-        y: f32 = 0,
-        z: f32 = 0,
+        pitch: f32 = 0,
+        yaw: f32 = 0,
+        roll: f32 = 0,
     } = null,
 };
 
@@ -101,6 +101,8 @@ fn custom_transform_proxy_to_custom_transform(transforms: []CustomTransformProxy
     for (transforms) |tr| {
         if (tr.translation) |t| {
             custom_transform.translate(t.x, t.y, t.z);
+        } else if (tr.rotation) |r| {
+            custom_transform.rotate(r.pitch, r.yaw, r.roll);
         } else {
             unreachable;
         }

@@ -24,6 +24,12 @@ pub const Transform = struct {
         self.inv_trans_mat = zmath.transpose(zmath.inverse(self.mat));
     }
 
+    pub fn rotate(self: *Self, pitch: f32, yaw: f32, roll: f32) void {
+        self.mat = zmath.mul(zmath.matFromRollPitchYaw(-pitch, -yaw, -roll), self.mat);
+        self.inv_mat = zmath.inverse(self.mat);
+        self.inv_trans_mat = zmath.transpose(zmath.inverse(self.mat));
+    }
+
     pub fn ray_global_to_object(self: *const Self, ray: *const Ray) Ray {
         const zmath_origin = zmath.F32x4{ ray.origin.x, ray.origin.y, ray.origin.z, 1.0 };
         const transformed_origin = zmath.mul(zmath_origin, self.mat);

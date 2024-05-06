@@ -102,10 +102,17 @@
                 "textIdx": 0,
                 "transforms": [
                     {
+                        "rotation": {
+                            "pitch": 0.2,
+                            "yaw": 1.5,
+                            "roll": 0
+                        }
+                    },
+                    {
                         "translation": {
                             "x": -1,
                             "y": 0,
-                            "z": 2
+                            "z": 4
                         }
                     }
                 ]
