@@ -27,7 +27,7 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
             .point_light => |item| {
                 const L = zmath.normalize3(item.position - intersection);
                 t_max = zmath.length3(item.position - intersection)[0];
-                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(normal, @as(Vec3, @splat(EPSILON)), intersection) }, EPSILON, t_max);
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), normal, intersection) }, EPSILON, t_max);
                 if (closest_hit.hit) {
                     continue;
                 }
@@ -103,7 +103,7 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
     }
 
     const R = reflect(-ray.direction, norm);
-    const new_origin = zmath.mulAdd(@as(Vec3, @splat(0.0001)), norm, closest_hit.intersection_point);
+    const new_origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), norm, closest_hit.intersection_point);
     const reflected_color = get_pixel_color(
         Ray{
             .direction = R,
