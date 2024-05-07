@@ -8,6 +8,9 @@ const Image = @import("Scene.zig").Image;
 const rl = @cImport({
     @cInclude("raylib.h");
 });
+const zmath = @import("zmath");
+const Pt3 = @import("Pt3.zig").Pt3;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Triangle = struct {
     const Self = @This();
@@ -16,6 +19,7 @@ pub const Triangle = struct {
     vb: Vertex,
     vc: Vertex,
     text: *const Image,
+    transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         // TODO: add bvh + compute this only one time

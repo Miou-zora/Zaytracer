@@ -9,7 +9,6 @@ const Light = @import("Light.zig").Light;
 const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const Plane = @import("Plane.zig").Plane;
 const HitRecord = @import("HitRecord.zig").HitRecord;
-const Transformation = @import("Transformation.zig");
 const Cylinder = @import("Cylinder.zig").Cylinder;
 const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;

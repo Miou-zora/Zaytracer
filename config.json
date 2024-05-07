@@ -40,13 +40,15 @@
                     "z": 0
                 },
                 "material": 2,
-                "transform": {
-                    "translation": {
-                        "x": 0,
-                        "y": 0.5,
-                        "z": 0
+                "transforms": [
+                    {
+                        "translation": {
+                            "x": 0,
+                            "y": 0.5,
+                            "z": 0
+                        }
                     }
-                }
+                ]
             }
         },
         {
@@ -58,13 +60,15 @@
                 },
                 "radius": 0.5,
                 "material": 3,
-                "transform": {
-                    "rotation": {
-                        "x": -0.3,
-                        "y": 0,
-                        "z": 0
+                "transforms": [
+                    {
+                        "rotation": {
+                            "pitch": 0.2,
+                            "yaw": 0,
+                            "roll": 0
+                        }
                     }
-                }
+                ]
             }
         },
         {
@@ -99,7 +103,23 @@
                         0.5, 0
                     ]
                 },
-                "textIdx": 0
+                "textIdx": 0,
+                "transforms": [
+                    {
+                        "rotation": {
+                            "pitch": 0,
+                            "yaw": 1.1,
+                            "roll": 0
+                        }
+                    },
+                    {
+                        "translation": {
+                            "x": -1,
+                            "y": 0,
+                            "z": 4
+                        }
+                    }
+                ]
             }
         }
     ],

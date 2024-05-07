@@ -4,7 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
-const Transformation = @import("Transformation.zig").Transformation;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Sphere = struct {
     const Self = @This();
@@ -12,7 +12,7 @@ pub const Sphere = struct {
     origin: Pt3,
     radius: f32,
     material: Material,
-    transform: ?Transformation,
+    transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const a: f32 = ray.direction.dot(ray.direction);
@@ -21,7 +21,7 @@ pub const Sphere = struct {
             ray.direction.y * (ray.origin.y - self.origin.y) +
             ray.direction.z * (ray.origin.z - self.origin.z));
         const ro_minus_origin = ray.origin.subVec3(self.origin);
-        const c: f32 = ro_minus_origin.mulVec3(ro_minus_origin).sum() - self.radius * self.radius; // Precalculate r*r
+        const c: f32 = ro_minus_origin.mulVec3(ro_minus_origin).sum() - self.radius * self.radius;
         const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();

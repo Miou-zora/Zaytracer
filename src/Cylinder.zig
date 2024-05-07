@@ -4,7 +4,7 @@ const std = @import("std");
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
-const Transformation = @import("Transformation.zig").Transformation;
+const Transform = @import("Transform.zig").Transform;
 
 pub const Cylinder = struct {
     const Self = @This();
@@ -12,7 +12,7 @@ pub const Cylinder = struct {
     radius: f32,
     origin: Pt3,
     material: Material,
-    transform: ?Transformation,
+    transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
         const rx_minus_cx = ray.origin.x - self.origin.x;
