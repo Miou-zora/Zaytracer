@@ -44,6 +44,67 @@ pub const Plane = struct {
     }
 };
 
+// TODO: fix these tests
+// test "hit" {
+//     const plane = Plane{
+//         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+//         .material = Material.nil(),
+//         .transform = null,
+//     };
+
+//     const ray = Ray{
+//         .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .direction = Vec3{ .x = 0.0, .y = -1.0, .z = 0.0 },
+//     };
+
+//     const hit_record = plane.hits(ray);
+
+//     try std.testing.expect(hit_record.hit);
+//     try std.testing.expect(hit_record.intersection_point.x == 0.0);
+//     try std.testing.expect(hit_record.intersection_point.y == 0.0);
+//     try std.testing.expect(hit_record.intersection_point.z == 0.0);
+//     try std.testing.expect(hit_record.normal.x == 0.0);
+//     try std.testing.expect(hit_record.normal.y == 1.0);
+//     try std.testing.expect(hit_record.normal.z == 0.0);
+// }
+
+// test "dontHit" {
+//     const plane = Plane{
+//         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+//         .material = Material.nil(),
+//         .transform = null,
+//     };
+
+//     const ray = Ray{
+//         .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .direction = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//     };
+
+//     const hit_record = plane.hits(ray);
+
+//     try std.testing.expect(!hit_record.hit);
+// }
+
+// test "parallel" {
+//     const plane = Plane{
+//         .normal = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .origin = Pt3{ .x = 0.0, .y = 0.0, .z = 0.0 },
+//         .material = Material.nil(),
+//         .transform = null,
+//     };
+
+//     const ray = Ray{
+//         .origin = Pt3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//         .direction = Vec3{ .x = 0.0, .y = 1.0, .z = 0.0 },
+//     };
+
+//     const hit_record = plane.hits(ray);
+
+//     try std.testing.expect(!hit_record.hit);
+// }
+
 test {
     std.testing.refAllDecls(@This());
 }

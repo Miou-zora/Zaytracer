@@ -156,7 +156,7 @@ pub const Config = struct {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{
                         .sphere = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
                             .material = proxy.materials[item.material],
                             .transform = transform_proxy_to_transform(trs),
@@ -165,7 +165,7 @@ pub const Config = struct {
                 } else {
                     conf.objects[i] = Object{
                         .sphere = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
                             .material = proxy.materials[item.material],
                         },
