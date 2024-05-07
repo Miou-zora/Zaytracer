@@ -26,14 +26,12 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
         switch (light) {
             .point_light => |item| {
                 const L = zmath.normalize3(item.position - intersection);
-                // t_max = intersection.to(item.position).length();
-                t_max = @sqrt(zmath.lengthSq3(item.position - intersection)[0]);
+                t_max = zmath.length3(item.position - intersection)[0];
                 const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(normal, @as(Vec3, @splat(EPSILON)), intersection) }, EPSILON, t_max);
                 if (closest_hit.hit) {
                     continue;
                 }
                 const n_dot_l = @reduce(.Add, (normal * L));
-                // const em = n_dot_l / (normal.length() * L.length()) * item.intensity;
                 const em = n_dot_l / (zmath.length3(normal) * zmath.length3(L))[0] * item.intensity;
                 if (em < 0) {
                     continue;
@@ -42,10 +40,8 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
                 lighting.g += item.color.g * em;
                 lighting.r += item.color.r * em;
                 if (material.specular != -1) {
-                    const R = reflect(L, normal);
-                    // const V = ray.direction.inv().normalized();
+                    const R = reflect(L, normal); // TODO: check tis
                     const V = zmath.normalize3(-ray.direction);
-                    // const r_dot_v = R.dot(V);
                     const r_dot_v = @reduce(.Add, R * V);
                     if (r_dot_v > 0) {
                         // const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
@@ -78,7 +74,7 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
 }
 
 fn reflect(v: Vec3, n: Vec3) Vec3 {
-    return zmath.mulAdd(zmath.dot3(v, n), n, -v);
+    return n * @as(Vec3, @splat(2 * @reduce(.Add, v * n))) - v;
 }
 
 fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recursion_depth: usize) qoi.Color {
@@ -107,7 +103,6 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
         return color;
     }
 
-    // const R = ray.direction.inv().reflect(norm);
     const R = reflect(-ray.direction, norm);
     const new_origin = zmath.mulAdd(@as(Vec3, @splat(0.0001)), norm, closest_hit.intersection_point);
     const reflected_color = get_pixel_color(
@@ -156,37 +151,6 @@ fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width:
 }
 
 pub fn main() !void {
-    // const Object = @import("Object.zig").Object;
-    // const ObjSphere: Object = .{
-    //     .shape = Object.Shape{
-    //         .sphere = .{
-    //             .origin = .{
-    //                 .x = 0,
-    //                 .y = 0,
-    //                 .z = 0,
-    //             },
-    //             .radius = 1,
-    //             .material = Material{
-    //                 .color = ColorRGB{ .r = 255, .g = 0, .b = 0 },
-    //                 .reflective = 0.5,
-    //                 .specular = 500,
-    //             },
-    //             .transform = null,
-    //         },
-    //     },
-    //     .transform = null,
-    // };
-
-    // comptime {
-    //     const rayToSphere = Ray{
-    //         .direction = Vec3{ .x = 0, .y = 0, .z = -1 },
-    //         .origin = Vec3{ .x = 0, .y = 0, .z = 2 },
-    //     };
-    //     const hit = ObjSphere.hits(rayToSphere);
-    //     _ = hit;
-    //     _ = ObjSphere.getOrigin();
-    // }
-
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 

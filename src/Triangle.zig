@@ -41,12 +41,9 @@ pub const Triangle = struct {
         const aSubc = a - c;
         const cSubb = c - b;
 
-        // const u = bSuba.cross(hit_point.subVec3(a)).dot(normal);
-        // const v = cSubb.cross(hit_point.subVec3(b)).dot(normal);
-        // const w = aSubc.cross(hit_point.subVec3(c)).dot(normal);
-        const u = zmath.dot3(zmath.cross3(bSuba, hit_point - a), normal)[0];
-        const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
-        const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
+        const u = @reduce(.Add, zmath.cross3(bSuba, hit_point - a) * normal);
+        const v = @reduce(.Add, zmath.cross3(cSubb, hit_point - b) * normal);
+        const w = @reduce(.Add, zmath.cross3(aSubc, hit_point - c) * normal);
 
         if (u < 0 or v < 0 or w < 0) {
             return HitRecord.nil();
