@@ -10,7 +10,7 @@ pub const Rect3 = struct {
     left: Vec3,
 
     pub fn pointAt(self: *const Self, x: f32, y: f32) Pt3 {
-        return self.origin.addVec3(self.top.mulf32(y)).addVec3(self.left.mulf32(x));
+        return self.origin + self.top * @as(Vec3, @splat(y)) + self.left * @as(Vec3, @splat(x));
     }
 };
 

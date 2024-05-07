@@ -2,6 +2,7 @@ const Pt3 = @import("Pt3.zig").Pt3;
 const Rect3 = @import("Rect3.zig").Rect3;
 const Ray = @import("Ray.zig").Ray;
 const std = @import("std");
+const zmath = @import("zmath");
 
 pub const Camera = struct {
     const Self = @This();
@@ -16,13 +17,13 @@ pub const Camera = struct {
         const TO_RAD = std.math.pi / 180.0;
         const distance = (halfWidth * @sin((180.0 - self.fov / 2 - 90.0) * TO_RAD)) / @sin(self.fov * TO_RAD);
         const screen = Rect3{
-            .origin = Pt3{ .x = -0.5, .y = -halfWidth, .z = distance },
-            .left = Pt3{ .x = 1, .y = 0, .z = 0 },
-            .top = Pt3{ .x = 0, .y = aspectRatio, .z = 0 },
+            .origin = zmath.f32x4(-0.5, -halfWidth, distance, 0),
+            .left = zmath.f32x4(1, 0, 0, 0),
+            .top = zmath.f32x4(0, aspectRatio, 0, 0),
         };
         return Ray{
-            .origin = Pt3.nil(),
-            .direction = screen.pointAt(x, y).subVec3(Pt3.nil()),
+            .origin = zmath.f32x4s(0),
+            .direction = screen.pointAt(x, y) - zmath.f32x4s(0),
         };
     }
 };

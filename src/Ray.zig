@@ -6,10 +6,6 @@ pub const Ray = struct {
 
     origin: Pt3,
     direction: Vec3,
-
-    pub fn at(self: Self, t: f32) Pt3 {
-        return self.origin.addVec3(self.direction.mulf32(t));
-    }
 };
 
 test {

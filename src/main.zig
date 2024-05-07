@@ -14,8 +14,9 @@ const Scene = @import("Scene.zig");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
+const zmath = @import("zmath");
 
-const EPSILON = 0.00001;
+const EPSILON: f32 = 0.00001;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = ColorRGB{ .r = 0, .g = 0, .b = 0 };
@@ -24,14 +25,16 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
         t_max = std.math.floatMax(f32);
         switch (light) {
             .point_light => |item| {
-                const L = intersection.to(item.position).normalized();
-                t_max = intersection.to(item.position).length();
-                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = intersection.addVec3(normal.mulf32(EPSILON)) }, EPSILON, t_max);
+                const L = zmath.normalize3(item.position - intersection);
+                // t_max = intersection.to(item.position).length();
+                t_max = @sqrt(zmath.lengthSq3(item.position - intersection)[0]);
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(normal, @as(Vec3, @splat(EPSILON)), intersection) }, EPSILON, t_max);
                 if (closest_hit.hit) {
                     continue;
                 }
-                const n_dot_l = normal.dot(L);
-                const em = n_dot_l / (normal.length() * L.length()) * item.intensity;
+                const n_dot_l = @reduce(.Add, (normal * L));
+                // const em = n_dot_l / (normal.length() * L.length()) * item.intensity;
+                const em = n_dot_l / (zmath.length3(normal) * zmath.length3(L))[0] * item.intensity;
                 if (em < 0) {
                     continue;
                 }
@@ -39,11 +42,14 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
                 lighting.g += item.color.g * em;
                 lighting.r += item.color.r * em;
                 if (material.specular != -1) {
-                    const R = L.reflect(normal);
-                    const V = ray.direction.inv().normalized();
-                    const r_dot_v = R.dot(V);
+                    const R = reflect(L, normal);
+                    // const V = ray.direction.inv().normalized();
+                    const V = zmath.normalize3(-ray.direction);
+                    // const r_dot_v = R.dot(V);
+                    const r_dot_v = @reduce(.Add, R * V);
                     if (r_dot_v > 0) {
-                        const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
+                        // const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
+                        const i = item.intensity * std.math.pow(f32, r_dot_v / (zmath.length3(R) * zmath.length3(V))[0], material.specular);
                         lighting.b += item.color.b * i;
                         lighting.g += item.color.g * i;
                         lighting.r += item.color.r * i;
@@ -71,6 +77,10 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
     return closest_hit;
 }
 
+fn reflect(v: Vec3, n: Vec3) Vec3 {
+    return zmath.mulAdd(zmath.dot3(v, n), n, -v);
+}
+
 fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recursion_depth: usize) qoi.Color {
     const closest_hit = find_closest_intersection(scene, ray, std.math.floatMin(f32), std.math.floatMax(f32));
 
@@ -82,7 +92,7 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
             .a = 255,
         };
     }
-    const norm = closest_hit.normal.normalized();
+    const norm = zmath.normalize3(closest_hit.normal);
     const inter = closest_hit.intersection_point;
     const material = closest_hit.material;
     const light_color = compute_lighting(inter, norm, scene, ray, material);
@@ -97,8 +107,9 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
         return color;
     }
 
-    const R = ray.direction.inv().reflect(norm);
-    const new_origin = closest_hit.intersection_point.addVec3(norm.mulf32(0.0001));
+    // const R = ray.direction.inv().reflect(norm);
+    const R = reflect(-ray.direction, norm);
+    const new_origin = zmath.mulAdd(@as(Vec3, @splat(0.0001)), norm, closest_hit.intersection_point);
     const reflected_color = get_pixel_color(
         Ray{
             .direction = R,

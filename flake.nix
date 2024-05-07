@@ -59,6 +59,7 @@
           [
             ffmpeg
             hyperfine
+            valgrind
           ]
           ++ (pkgs.lib.optionals
             pkgs.stdenv.isLinux [linuxPackages_latest.perf]);
