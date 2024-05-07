@@ -69,7 +69,7 @@ test "hit" {
     };
     const ray = Ray{
         .origin = zmath.f32x4(0, 0, 2, 1),
-        .direction = zmath.f32x4(0, 0, 0, -1),
+        .direction = zmath.f32x4(0, 0, -1, 0),
     };
     const hit = sphere.hits(ray);
     try std.testing.expect(hit.hit);
@@ -81,43 +81,43 @@ test "hit" {
     try std.testing.expect(hit.normal[2] == 1);
 }
 
-// test "dontHit" {
-//     const sphere = Sphere{
-//         .origin = Pt3{ .x = 100, .y = 100, .z = 100 },
-//         .radius = 1,
-//         .material = Material.nil(),
-//         .transform = null,
-//     };
-//     const ray = Ray{
-//         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
-//         .direction = Pt3{ .x = 0, .y = 0, .z = -1 },
-//     };
+test "dontHit" {
+    const sphere = Sphere{
+        .origin = zmath.f32x4(100, 100, 100, 1),
+        .radius = 1,
+        .material = Material.nil(),
+        .transform = null,
+    };
+    const ray = Ray{
+        .origin = zmath.f32x4(0, 0, 0, 1),
+        .direction = zmath.f32x4(0, 0, -1, 0),
+    };
 
-//     const hit = sphere.hits(ray);
-//     try std.testing.expect(!hit.hit);
-// }
+    const hit = sphere.hits(ray);
+    try std.testing.expect(!hit.hit);
+}
 
-// test "limit" {
-//     const sphere = Sphere{
-//         .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
-//         .radius = 1,
-//         .material = Material.nil(),
-//         .transform = null,
-//     };
-//     const ray = Ray{
-//         .origin = Pt3{ .x = 0, .y = -1, .z = -1 },
-//         .direction = Pt3{ .x = 0, .y = 0, .z = 1 },
-//     };
+test "limit" {
+    const sphere = Sphere{
+        .origin = zmath.f32x4(0, 0, 0, 1),
+        .radius = 1,
+        .material = Material.nil(),
+        .transform = null,
+    };
+    const ray = Ray{
+        .origin = zmath.f32x4(0, -1, -1, 1),
+        .direction = zmath.f32x4(0, 0, 1, 0),
+    };
 
-//     const hit = sphere.hits(ray);
-//     try std.testing.expect(hit.hit);
-//     try std.testing.expect(hit.intersection_point.x == 0);
-//     try std.testing.expect(hit.intersection_point.y == -1);
-//     try std.testing.expect(hit.intersection_point.z == 0);
-//     try std.testing.expect(hit.normal.x == 0);
-//     try std.testing.expect(hit.normal.y == -1);
-//     try std.testing.expect(hit.normal.z == 0);
-// }
+    const hit = sphere.hits(ray);
+    try std.testing.expect(hit.hit);
+    try std.testing.expect(hit.intersection_point[0] == 0);
+    try std.testing.expect(hit.intersection_point[1] == -1);
+    try std.testing.expect(hit.intersection_point[2] == 0);
+    try std.testing.expect(hit.normal[0] == 0);
+    try std.testing.expect(hit.normal[1] == -1);
+    try std.testing.expect(hit.normal[2] == 0);
+}
 
 test {
     std.testing.refAllDecls(@This());
