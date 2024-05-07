@@ -44,7 +44,6 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
                     const V = zmath.normalize3(-ray.direction);
                     const r_dot_v = @reduce(.Add, R * V);
                     if (r_dot_v > 0) {
-                        // const i = item.intensity * std.math.pow(f32, r_dot_v / (R.length() * V.length()), material.specular);
                         const i = item.intensity * std.math.pow(f32, r_dot_v / (zmath.length3(R) * zmath.length3(V))[0], material.specular);
                         lighting.b += item.color.b * i;
                         lighting.g += item.color.g * i;
