@@ -62,13 +62,19 @@ const ObjectProxy = struct {
     } = null,
 };
 
+const ColorRGBProxy = struct {
+    r: f32,
+    g: f32,
+    b: f32,
+};
+
 const AmbientLightProxy = struct {
-    color: ColorRGB,
+    color: ColorRGBProxy,
     intensity: f32,
 };
 
 const PointLightProxy = struct {
-    color: ColorRGB,
+    color: ColorRGBProxy,
     intensity: f32,
     position: Pt3Proxy,
 };
@@ -82,9 +88,15 @@ const AssetProxy = struct {
     imageName: [:0]const u8,
 };
 
+const MaterialProxy = struct {
+    color: ColorRGBProxy,
+    specular: f32,
+    reflective: f32,
+};
+
 const ConfigProxy = struct {
     camera: Camera,
-    materials: []Material,
+    materials: []MaterialProxy,
     objects: []ObjectProxy,
     lights: []LightProxy,
     assets: []AssetProxy,
@@ -115,6 +127,14 @@ fn transform_proxy_to_transform(transforms: []TransformProxy) Transform {
         }
     }
     return custom_transform;
+}
+
+fn load_material(proxy: MaterialProxy) Material {
+    return Material{
+        .color = ColorRGB{ proxy.color.r, proxy.color.g, proxy.color.b, 0 },
+        .specular = proxy.specular,
+        .reflective = proxy.reflective,
+    };
 }
 
 pub const Config = struct {
@@ -158,7 +178,7 @@ pub const Config = struct {
                         .sphere = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
                         },
                     };
@@ -167,7 +187,7 @@ pub const Config = struct {
                         .sphere = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                         },
                     };
                 }
@@ -177,7 +197,7 @@ pub const Config = struct {
                         .plane = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
                         },
                     };
@@ -186,7 +206,7 @@ pub const Config = struct {
                         .plane = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                         },
                     };
                 }
@@ -196,7 +216,7 @@ pub const Config = struct {
                         .cylinder = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
                         },
                     };
@@ -205,7 +225,7 @@ pub const Config = struct {
                         .cylinder = .{
                             .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
                             .radius = item.radius,
-                            .material = proxy.materials[item.material],
+                            .material = load_material(proxy.materials[item.material]),
                         },
                     };
                 }
@@ -251,13 +271,13 @@ pub const Config = struct {
         for (proxy.lights, 0..) |obj, i| {
             if (obj.point) |item| {
                 conf.lights[i] = Light{ .point_light = .{
-                    .color = item.color,
+                    .color = .{ item.color.r, item.color.g, item.color.b, 0 },
                     .intensity = item.intensity,
                     .position = .{ item.position.x, item.position.y, item.position.z, 0 },
                 } };
             } else if (obj.ambient) |item| {
                 conf.lights[i] = Light{ .ambient_light = .{
-                    .color = item.color,
+                    .color = .{ item.color.r, item.color.g, item.color.b, 0 },
                     .intensity = item.intensity,
                 } };
             } else {

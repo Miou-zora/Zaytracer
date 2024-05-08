@@ -11,6 +11,7 @@ const rl = @cImport({
 const zmath = @import("zmath");
 const Pt3 = @import("Pt3.zig").Pt3;
 const Transform = @import("Transform.zig").Transform;
+const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 
 pub const Triangle = struct {
     const Self = @This();
@@ -55,11 +56,7 @@ pub const Triangle = struct {
         };
         const cInt_to_usize = @as(usize, @intCast(self.text.rlImage.width));
         const color: rl.Color = self.text.rlColors[posInImage[1] * cInt_to_usize + posInImage[0]];
-        const colorRGB = .{
-            .r = @as(f32, @floatFromInt(color.r)),
-            .g = @as(f32, @floatFromInt(color.g)),
-            .b = @as(f32, @floatFromInt(color.b)),
-        };
+        const colorRGB: ColorRGB = zmath.f32x4(@as(f32, @floatFromInt(color.r)), @as(f32, @floatFromInt(color.g)), @as(f32, @floatFromInt(color.b)), 0);
 
         const material: Material = .{
             .color = colorRGB,

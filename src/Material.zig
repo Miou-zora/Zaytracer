@@ -1,5 +1,6 @@
 const std = @import("std");
 const Color = @import("ColorRGB.zig").ColorRGB;
+const zmath = @import("zmath");
 
 pub const Material = struct {
     const Self = @This();
@@ -9,7 +10,7 @@ pub const Material = struct {
 
     pub fn nil() Self {
         return Material{
-            .color = .{ .r = 0.0, .g = 0.0, .b = 0.0 },
+            .color = zmath.f32x4s(0),
             .specular = 0.0,
             .reflective = 0.0,
         };
