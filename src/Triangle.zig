@@ -42,17 +42,19 @@ pub const Triangle = struct {
         const aSubc = a - c;
         const cSubb = c - b;
 
-        const u = @reduce(.Add, zmath.cross3(bSuba, hit_point - a) * normal);
-        const v = @reduce(.Add, zmath.cross3(cSubb, hit_point - b) * normal);
-        const w = @reduce(.Add, zmath.cross3(aSubc, hit_point - c) * normal);
+        const u = zmath.dot3(zmath.cross3(bSuba, hit_point - a), normal)[0];
+        const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
+        const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
 
         if (u < 0 or v < 0 or w < 0) {
             return HitRecord.nil();
         }
-
+        const barycentric = zmath.f32x4(u, v, w, 0);
+        const texCoord1 = zmath.f32x4(self.va.texCoord[0], self.vb.texCoord[0], self.vc.texCoord[0], 0); // Is it efficient to store this in tmp const?
+        const texCoord2 = zmath.f32x4(self.va.texCoord[1], self.vb.texCoord[1], self.vc.texCoord[1], 0); // same
         const posInImage: @Vector(2, usize) = .{
-            @as(usize, @intFromFloat((u * self.va.texCoord[0] + v * self.vb.texCoord[0] + w * self.vc.texCoord[0]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
-            @as(usize, @intFromFloat((u * self.va.texCoord[1] + v * self.vb.texCoord[1] + w * self.vc.texCoord[1]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
+            @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord1) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
+            @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord2) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
         };
         const cInt_to_usize = @as(usize, @intCast(self.text.rlImage.width));
         const color: rl.Color = self.text.rlColors[posInImage[1] * cInt_to_usize + posInImage[0]];

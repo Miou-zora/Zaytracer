@@ -21,13 +21,13 @@ pub const Plane = struct {
     }
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const denom = @reduce(.Add, self.normal * ray.direction);
+        const denom: f32 = zmath.dot3(self.normal, ray.direction)[0];
 
         if (denom == 0.0) {
             return HitRecord.nil();
         }
 
-        const t = @reduce(.Add, (self.origin - ray.origin) * self.normal) / denom;
+        const t: f32 = zmath.dot3(self.origin - ray.origin, self.normal)[0] / denom;
 
         if (t < 0.0) {
             return HitRecord.nil();

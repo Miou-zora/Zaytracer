@@ -91,12 +91,6 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
         width,
         recursion_depth - 1,
     );
-    // return .{
-    //     .r = @as(u8, @intFromFloat(@as(f32, @floatFromInt(color.r)) * (1 - reflective) + @as(f32, @floatFromInt(reflected_color.r)) * reflective)),
-    //     .g = @as(u8, @intFromFloat(@as(f32, @floatFromInt(color.g)) * (1 - reflective) + @as(f32, @floatFromInt(reflected_color.g)) * reflective)),
-    //     .b = @as(u8, @intFromFloat(@as(f32, @floatFromInt(color.b)) * (1 - reflective) + @as(f32, @floatFromInt(reflected_color.b)) * reflective)),
-    //     .a = 255,
-    // };
     return color * @as(Vec3, @splat(1 - reflective)) + reflected_color * @as(Vec3, @splat(reflective));
 }
 

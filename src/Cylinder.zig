@@ -16,11 +16,10 @@ pub const Cylinder = struct {
     transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const rx_minus_cx = ray.origin[0] - self.origin[0];
-        const ry_minus_cy = ray.origin[1] - self.origin[1];
-        const a = ray.direction[0] * ray.direction[0] + ray.direction[1] * ray.direction[1];
-        const b = 2.0 * (ray.direction[0] * rx_minus_cx + ray.direction[1] * ry_minus_cy);
-        const c = rx_minus_cx * rx_minus_cx + ry_minus_cy * ry_minus_cy - self.radius * self.radius;
+        const r_minus_c = ray.origin - self.origin;
+        const a = zmath.dot2(ray.direction, ray.direction)[0] * 2; // Good luck to understand this, I don't
+        const b = zmath.dot2(ray.direction, r_minus_c)[0] * 4;
+        const c = zmath.dot2(r_minus_c, r_minus_c)[0] * 2 - self.radius * self.radius;
 
         const delta = b * b - 4.0 * a * c;
         if (delta < 0.0 or a == 0.0) {
@@ -31,9 +30,10 @@ pub const Cylinder = struct {
             if (t < 0.0) {
                 return HitRecord.nil();
             } else {
+                const normal = intersection_point - self.origin;
                 return HitRecord{
                     .hit = true,
-                    .normal = zmath.f32x4(intersection_point[0] - self.origin[0], intersection_point[1] - self.origin[1], 0, 0),
+                    .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
                     .intersection_point = intersection_point,
                     .t = zmath.length3(intersection_point - ray.origin)[0],
                     .material = self.material,
@@ -47,9 +47,10 @@ pub const Cylinder = struct {
             }
             const t = if (t1 < t2 and t1 > 0) t1 else t2;
             const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
+            const normal = intersection_point - self.origin;
             return HitRecord{
                 .hit = true,
-                .normal = zmath.f32x4(intersection_point[0] - self.origin[0], intersection_point[1] - self.origin[1], 0, 0),
+                .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
                 .intersection_point = intersection_point,
                 .t = zmath.length3(intersection_point - ray.origin)[0],
                 .material = self.material,
