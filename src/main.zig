@@ -60,7 +60,7 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
 }
 
 fn reflect(v: Vec3, n: Vec3) Vec3 {
-    return n * @as(Vec3, @splat(2 * @reduce(.Add, v * n))) - v;
+    return zmath.mulAdd(n * @as(Vec3, @splat(2)), zmath.dot3(v, n), -v);
 }
 
 fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recursion_depth: usize) ColorRGB {
