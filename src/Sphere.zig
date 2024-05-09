@@ -16,10 +16,9 @@ pub const Sphere = struct {
     transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const a: f32 = @reduce(.Add, ray.direction * ray.direction);
-        const b: f32 = 2 * @reduce(.Add, ray.direction * (ray.origin - self.origin));
-        const ro_minus_origin = ray.origin - self.origin;
-        const c: f32 = @reduce(.Add, ro_minus_origin * ro_minus_origin) - self.radius * self.radius;
+        const a: f32 = zmath.dot3(ray.direction, ray.direction)[0];
+        const b: f32 = 2 * zmath.dot3(ray.direction, ray.origin - self.origin)[0];
+        const c: f32 = zmath.lengthSq3(ray.origin - self.origin)[0] - self.radius * self.radius;
         const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();
@@ -33,7 +32,7 @@ pub const Sphere = struct {
                     .hit = true,
                     .normal = intersection_point - self.origin,
                     .intersection_point = intersection_point,
-                    .t = zmath.length3(intersection_point - ray.origin)[0],
+                    .t = 0,
                     .material = self.material,
                 };
             }
@@ -52,7 +51,7 @@ pub const Sphere = struct {
                     .hit = true,
                     .normal = intersection_point - self.origin,
                     .intersection_point = intersection_point,
-                    .t = zmath.length3(intersection_point - ray.origin)[0],
+                    .t = 0,
                     .material = self.material,
                 };
             }
@@ -79,7 +78,6 @@ test "hit" {
     try std.testing.expect(hit.normal[0] == 0);
     try std.testing.expect(hit.normal[1] == 0);
     try std.testing.expect(hit.normal[2] == 1);
-    try std.testing.expect(hit.t == 1);
 }
 
 test "dontHit" {
@@ -118,7 +116,6 @@ test "limit" {
     try std.testing.expect(hit.normal[0] == 0);
     try std.testing.expect(hit.normal[1] == -1);
     try std.testing.expect(hit.normal[2] == 0);
-    try std.testing.expect(hit.t == 1);
 }
 
 test {

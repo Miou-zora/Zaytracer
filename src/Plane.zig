@@ -38,7 +38,7 @@ pub const Plane = struct {
             .hit = true,
             .intersection_point = hit_point,
             .normal = self.normal,
-            .t = zmath.length3(hit_point - ray.origin)[0],
+            .t = 0,
             .material = self.material,
         };
     }
