@@ -67,7 +67,7 @@ pub const Triangle = struct {
         };
         return HitRecord{
             .hit = true,
-            .t = zmath.length3(hit_point - ray.origin)[0],
+            .t = 0,
             .intersection_point = hit_point,
             .normal = normal,
             .material = material,

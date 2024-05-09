@@ -113,6 +113,11 @@ const TransformProxy = struct {
         yaw: f32 = 0,
         roll: f32 = 0,
     } = null,
+    scale: ?struct {
+        x: f32 = 1,
+        y: f32 = 1,
+        z: f32 = 1,
+    } = null,
 };
 
 fn transform_proxy_to_transform(transforms: []TransformProxy) Transform {
@@ -122,6 +127,8 @@ fn transform_proxy_to_transform(transforms: []TransformProxy) Transform {
             custom_transform.translate(t.x, t.y, t.z);
         } else if (tr.rotation) |r| {
             custom_transform.rotate(r.pitch, r.yaw, r.roll);
+        } else if (tr.scale) |s| {
+            custom_transform.scale(s.x, s.y, s.z);
         } else {
             unreachable;
         }

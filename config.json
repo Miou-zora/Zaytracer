@@ -24,7 +24,16 @@
                     "z": 2
                 },
                 "radius": 0.3,
-                "material": 1
+                "material": 1,
+                "transforms": [
+                    {
+                        "scale": {
+                            "x": 0.5,
+                            "y": 2,
+                            "z": 0.9
+                        }
+                    }
+                ]
             }
         },
         {

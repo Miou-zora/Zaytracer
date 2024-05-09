@@ -8,15 +8,30 @@ const std = @import("std");
 const Triangle = @import("Triangle.zig").Triangle;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Ray = @import("Ray.zig").Ray;
+const zmath = @import("zmath");
 const rl = @cImport({
     @cInclude("raylib.h");
 });
 
 fn compute_record_with_transform(obj: anytype, ray: Ray) HitRecord {
     if (obj.transform) |transform| {
-        return transform.hitRecord_object_to_global(obj.hits(transform.ray_global_to_object(&ray)));
+        const record = transform.hitRecord_object_to_global(obj.hits(transform.ray_global_to_object(&ray)));
+        return .{
+            .hit = record.hit,
+            .t = zmath.length3(record.intersection_point - ray.origin)[0],
+            .intersection_point = record.intersection_point,
+            .normal = record.normal,
+            .material = record.material,
+        };
     } else {
-        return obj.hits(ray);
+        const record = obj.hits(ray);
+        return .{
+            .hit = record.hit,
+            .t = zmath.length3(record.intersection_point - ray.origin)[0],
+            .intersection_point = record.intersection_point,
+            .normal = record.normal,
+            .material = record.material,
+        };
     }
 }
 

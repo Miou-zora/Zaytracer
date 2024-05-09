@@ -11,12 +11,20 @@ pub const Transform = struct {
 
     pub fn translate(self: *Self, x: f32, y: f32, z: f32) void {
         self.mat = zmath.mul(self.mat, zmath.translation(-x, -y, -z));
-        self.inv_mat = zmath.inverse(self.mat);
-        self.inv_trans_mat = zmath.transpose(zmath.inverse(self.mat));
+        self.update_matrices();
     }
 
     pub fn rotate(self: *Self, pitch: f32, yaw: f32, roll: f32) void {
         self.mat = zmath.mul(self.mat, zmath.matFromRollPitchYaw(-pitch, -yaw, -roll));
+        self.update_matrices();
+    }
+
+    pub fn scale(self: *Self, x: f32, y: f32, z: f32) void {
+        self.mat = zmath.mul(self.mat, zmath.scaling(x, y, z));
+        self.update_matrices();
+    }
+
+    fn update_matrices(self: *Self) void {
         self.inv_mat = zmath.inverse(self.mat);
         self.inv_trans_mat = zmath.transpose(zmath.inverse(self.mat));
     }

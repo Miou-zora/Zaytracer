@@ -35,7 +35,7 @@ pub const Cylinder = struct {
                     .hit = true,
                     .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
                     .intersection_point = intersection_point,
-                    .t = zmath.length3(intersection_point - ray.origin)[0],
+                    .t = 0,
                     .material = self.material,
                 };
             }
@@ -52,7 +52,7 @@ pub const Cylinder = struct {
                 .hit = true,
                 .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
                 .intersection_point = intersection_point,
-                .t = zmath.length3(intersection_point - ray.origin)[0],
+                .t = 0,
                 .material = self.material,
             };
         }
