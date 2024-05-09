@@ -22,40 +22,18 @@ pub const Sphere = struct {
         const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();
-        } else if (delta == 0) {
-            const t = -b / (2 * a);
-            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
-            if (t < 0) {
-                return HitRecord.nil();
-            } else {
-                return HitRecord{
-                    .hit = true,
-                    .normal = intersection_point - self.origin,
-                    .intersection_point = intersection_point,
-                    .t = 0,
-                    .material = self.material,
-                };
-            }
-        } else {
-            const t1 = (-b + @sqrt(delta)) / (2 * a);
-            const t2 = (-b - @sqrt(delta)) / (2 * a);
-            if (t1 < 0 and t2 < 0) {
-                return HitRecord.nil();
-            }
-            const t = if (t1 < t2 and t1 > 0) t1 else t2;
-            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
-            if (t < 0) {
-                return HitRecord.nil();
-            } else {
-                return HitRecord{
-                    .hit = true,
-                    .normal = intersection_point - self.origin,
-                    .intersection_point = intersection_point,
-                    .t = 0,
-                    .material = self.material,
-                };
-            }
         }
+        const t = (-b - @sqrt(delta)) / (2 * a);
+        if (t < 0)
+            return HitRecord.nil();
+        const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
+        return HitRecord{
+            .hit = true,
+            .normal = intersection_point - self.origin,
+            .intersection_point = intersection_point,
+            .t = 0,
+            .material = self.material,
+        };
     }
 };
 

@@ -37,6 +37,37 @@
             }
         },
         {
+            "sphere": {
+                "origin": {
+                    "x": 1,
+                    "y": -0.5,
+                    "z": 5
+                },
+                "radius": 0.5,
+                "material": 1
+            }
+        },
+        {
+            "sphere": {
+                "origin": {
+                    "x": 1,
+                    "y": 0.5,
+                    "z": 5
+                },
+                "radius": 0.3,
+                "material": 1,
+                "transforms": [
+                    {
+                        "scale": {
+                            "x": 0.5,
+                            "y": 2,
+                            "z": 0.9
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "plane": {
                 "origin": {
                     "x": 0,
@@ -84,9 +115,9 @@
             "triangle": {
                 "va": {
                     "position": {
-                        "x": -3,
-                        "y": -0.5,
-                        "z": 2
+                        "x": 0,
+                        "y": 3,
+                        "z": 4
                     },
                     "texCoord": [
                         1, 1
@@ -94,41 +125,60 @@
                 },
                 "vb": {
                     "position": {
-                        "x": -2,
+                        "x": -3,
                         "y": 3,
-                        "z": 3.5
+                        "z": 4
+                    },
+                    "texCoord": [
+                        1, 0
+                    ]
+                },
+                "vc": {
+                    "position": {
+                        "x": 0,
+                        "y": -0.5,
+                        "z": 4
+                    },
+                    "texCoord": [
+                        0, 0
+                    ]
+                },
+                "textIdx": 0
+            }
+        },
+        {
+            "triangle": {
+                "va": {
+                    "position": {
+                        "x": -3,
+                        "y": 3,
+                        "z": 4
+                    },
+                    "texCoord": [
+                        1, 1
+                    ]
+                },
+                "vb": {
+                    "position": {
+                        "x": -3,
+                        "y": -0.5,
+                        "z": 4
+                    },
+                    "texCoord": [
+                        0, 0
+                    ]
+                },
+                "vc": {
+                    "position": {
+                        "x": 0,
+                        "y": -0.5,
+                        "z": 4
                     },
                     "texCoord": [
                         0, 1
                     ]
                 },
-                "vc": {
-                    "position": {
-                        "x": 0.5,
-                        "y": -0.5,
-                        "z": 4
-                    },
-                    "texCoord": [
-                        0.5, 0
-                    ]
-                },
-                "textIdx": 0,
-                "transforms": [
-                    {
-                        "rotation": {
-                            "pitch": 0,
-                            "yaw": 1.1,
-                            "roll": 0
-                        }
-                    },
-                    {
-                        "translation": {
-                            "x": -1,
-                            "y": 0,
-                            "z": 4
-                        }
-                    }
-                ]
+                "textIdx": 0
             }
         }
     ],

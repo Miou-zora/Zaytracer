@@ -12,7 +12,7 @@ pub const HitRecord = struct {
     t: f32,
     material: Material,
 
-    pub fn nil() Self {
+    pub inline fn nil() Self {
         return Self{
             .hit = false,
             .normal = zmath.f32x4s(0),

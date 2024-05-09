@@ -62,7 +62,7 @@ pub const Triangle = struct {
 
         const material: Material = .{
             .color = colorRGB,
-            .reflective = 0.75,
+            .reflective = 0,
             .specular = 0,
         };
         return HitRecord{
