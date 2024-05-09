@@ -11,6 +11,7 @@ const rl = @cImport({
 const zmath = @import("zmath");
 const Pt3 = @import("Pt3.zig").Pt3;
 const Transform = @import("Transform.zig").Transform;
+const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 
 pub const Triangle = struct {
     const Self = @This();
@@ -26,40 +27,38 @@ pub const Triangle = struct {
         const a = self.va.position;
         const b = self.vb.position;
         const c = self.vc.position;
-        const bSuba = b.subVec3(a);
-        const cSuba = c.subVec3(a);
+        const bSuba = b - a;
+        const cSuba = c - a;
 
-        const normal = bSuba.cross(cSuba).normalized();
-        const t = normal.dot(a.subVec3(ray.origin)) / normal.dot(ray.direction);
+        const normal = zmath.normalize3(zmath.cross3(bSuba, cSuba));
+        const t: f32 = @reduce(.Add, (normal * (a - ray.origin))) / @reduce(.Add, normal * ray.direction);
 
         if (t < 0) {
             return HitRecord.nil();
         }
 
-        const hit_point = ray.at(t);
+        const hit_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
 
-        const aSubc = a.subVec3(c);
-        const cSubb = c.subVec3(b);
+        const aSubc = a - c;
+        const cSubb = c - b;
 
-        const u = bSuba.cross(hit_point.subVec3(a)).dot(normal);
-        const v = cSubb.cross(hit_point.subVec3(b)).dot(normal);
-        const w = aSubc.cross(hit_point.subVec3(c)).dot(normal);
+        const u = zmath.dot3(zmath.cross3(bSuba, hit_point - a), normal)[0];
+        const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
+        const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
 
         if (u < 0 or v < 0 or w < 0) {
             return HitRecord.nil();
         }
-
+        const barycentric = zmath.f32x4(u, v, w, 0);
+        const texCoord1 = zmath.f32x4(self.va.texCoord[0], self.vb.texCoord[0], self.vc.texCoord[0], 0); // Is it efficient to store this in tmp const?
+        const texCoord2 = zmath.f32x4(self.va.texCoord[1], self.vb.texCoord[1], self.vc.texCoord[1], 0); // same
         const posInImage: @Vector(2, usize) = .{
-            @as(usize, @intFromFloat((u * self.va.texCoord[0] + v * self.vb.texCoord[0] + w * self.vc.texCoord[0]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
-            @as(usize, @intFromFloat((u * self.va.texCoord[1] + v * self.vb.texCoord[1] + w * self.vc.texCoord[1]) / (u + v + w) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
+            @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord1) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
+            @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord2) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
         };
         const cInt_to_usize = @as(usize, @intCast(self.text.rlImage.width));
         const color: rl.Color = self.text.rlColors[posInImage[1] * cInt_to_usize + posInImage[0]];
-        const colorRGB = .{
-            .r = @as(f32, @floatFromInt(color.r)),
-            .g = @as(f32, @floatFromInt(color.g)),
-            .b = @as(f32, @floatFromInt(color.b)),
-        };
+        const colorRGB: ColorRGB = zmath.f32x4(@as(f32, @floatFromInt(color.r)), @as(f32, @floatFromInt(color.g)), @as(f32, @floatFromInt(color.b)), 0);
 
         const material: Material = .{
             .color = colorRGB,
@@ -68,7 +67,7 @@ pub const Triangle = struct {
         };
         return HitRecord{
             .hit = true,
-            .t = hit_point.distance(ray.origin),
+            .t = zmath.length3(hit_point - ray.origin)[0],
             .intersection_point = hit_point,
             .normal = normal,
             .material = material,

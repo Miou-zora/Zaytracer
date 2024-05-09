@@ -1,8 +1,9 @@
 const std = @import("std");
 const Camera = @import("Camera.zig").Camera;
 const Material = @import("Material.zig").Material;
-const Pt3 = @import("Pt3.zig").Pt3;
-const Vec3 = @import("Vec3.zig").Vec3;
+// const Pt3 = @import("Pt3.zig").Pt3;
+// const zmath = @import("zmath");
+// const Vec = zmath.Vec;
 const Scene = @import("Scene.zig");
 const Sphere = @import("Sphere.zig").Sphere;
 const Object = Scene.SceneObject;
@@ -14,48 +15,88 @@ const Image = Scene.Image;
 const rl = @cImport({
     @cInclude("raylib.h");
 });
+const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Transform = @import("Transform.zig").Transform;
+
+const Vec3Proxy = struct {
+    x: f32,
+    y: f32,
+    z: f32,
+};
+const Pt3Proxy = struct {
+    x: f32,
+    y: f32,
+    z: f32,
+};
+
+const VertexProxy = struct {
+    position: Pt3Proxy,
+    texCoord: @Vector(2, f32),
+};
 
 const ObjectProxy = struct {
     sphere: ?struct {
-        origin: Pt3,
+        origin: Pt3Proxy,
         radius: f32,
         material: usize,
         transforms: ?[]TransformProxy = null,
     } = null,
     plane: ?struct {
-        normal: Vec3,
-        origin: Pt3,
+        normal: Vec3Proxy,
+        origin: Pt3Proxy,
         material: usize,
         transforms: ?[]TransformProxy = null,
     } = null,
     cylinder: ?struct {
-        origin: Pt3,
+        origin: Pt3Proxy,
         radius: f32,
         material: usize,
         transforms: ?[]TransformProxy = null,
     } = null,
     triangle: ?struct {
-        va: Vertex,
-        vb: Vertex,
-        vc: Vertex,
+        va: VertexProxy,
+        vb: VertexProxy,
+        vc: VertexProxy,
         textIdx: usize,
         transforms: ?[]TransformProxy = null,
     } = null,
 };
 
+const ColorRGBProxy = struct {
+    r: f32,
+    g: f32,
+    b: f32,
+};
+
+const AmbientLightProxy = struct {
+    color: ColorRGBProxy,
+    intensity: f32,
+};
+
+const PointLightProxy = struct {
+    color: ColorRGBProxy,
+    intensity: f32,
+    position: Pt3Proxy,
+};
+
 const LightProxy = struct {
-    ambient: ?AmbientLight = null,
-    point: ?PointLight = null,
+    ambient: ?AmbientLightProxy = null,
+    point: ?PointLightProxy = null,
 };
 
 const AssetProxy = struct {
     imageName: [:0]const u8,
 };
 
+const MaterialProxy = struct {
+    color: ColorRGBProxy,
+    specular: f32,
+    reflective: f32,
+};
+
 const ConfigProxy = struct {
     camera: Camera,
-    materials: []Material,
+    materials: []MaterialProxy,
     objects: []ObjectProxy,
     lights: []LightProxy,
     assets: []AssetProxy,
@@ -86,6 +127,14 @@ fn transform_proxy_to_transform(transforms: []TransformProxy) Transform {
         }
     }
     return custom_transform;
+}
+
+fn load_material(proxy: MaterialProxy) Material {
+    return Material{
+        .color = ColorRGB{ proxy.color.r, proxy.color.g, proxy.color.b, 0 },
+        .specular = proxy.specular,
+        .reflective = proxy.reflective,
+    };
 }
 
 pub const Config = struct {
@@ -125,63 +174,93 @@ pub const Config = struct {
         for (proxy.objects, 0..) |obj, i| {
             if (obj.sphere) |item| {
                 if (item.transforms) |trs| {
-                    conf.objects[i] = Object{ .sphere = .{
-                        .origin = item.origin,
-                        .radius = item.radius,
-                        .material = proxy.materials[item.material],
-                        .transform = transform_proxy_to_transform(trs),
-                    } };
+                    conf.objects[i] = Object{
+                        .sphere = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .radius = item.radius,
+                            .material = load_material(proxy.materials[item.material]),
+                            .transform = transform_proxy_to_transform(trs),
+                        },
+                    };
                 } else {
-                    conf.objects[i] = Object{ .sphere = .{
-                        .origin = item.origin,
-                        .radius = item.radius,
-                        .material = proxy.materials[item.material],
-                    } };
+                    conf.objects[i] = Object{
+                        .sphere = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .radius = item.radius,
+                            .material = load_material(proxy.materials[item.material]),
+                        },
+                    };
                 }
             } else if (obj.plane) |item| {
                 if (item.transforms) |trs| {
-                    conf.objects[i] = Object{ .plane = .{
-                        .origin = item.origin,
-                        .normal = item.normal,
-                        .material = proxy.materials[item.material],
-                        .transform = transform_proxy_to_transform(trs),
-                    } };
+                    conf.objects[i] = Object{
+                        .plane = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
+                            .material = load_material(proxy.materials[item.material]),
+                            .transform = transform_proxy_to_transform(trs),
+                        },
+                    };
                 } else {
-                    conf.objects[i] = Object{ .plane = .{
-                        .origin = item.origin,
-                        .normal = item.normal,
-                        .material = proxy.materials[item.material],
-                    } };
+                    conf.objects[i] = Object{
+                        .plane = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
+                            .material = load_material(proxy.materials[item.material]),
+                        },
+                    };
                 }
             } else if (obj.cylinder) |item| {
                 if (item.transforms) |trs| {
-                    conf.objects[i] = Object{ .cylinder = .{
-                        .origin = item.origin,
-                        .radius = item.radius,
-                        .material = proxy.materials[item.material],
-                        .transform = transform_proxy_to_transform(trs),
-                    } };
+                    conf.objects[i] = Object{
+                        .cylinder = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .radius = item.radius,
+                            .material = load_material(proxy.materials[item.material]),
+                            .transform = transform_proxy_to_transform(trs),
+                        },
+                    };
                 } else {
-                    conf.objects[i] = Object{ .cylinder = .{
-                        .origin = item.origin,
-                        .radius = item.radius,
-                        .material = proxy.materials[item.material],
-                    } };
+                    conf.objects[i] = Object{
+                        .cylinder = .{
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .radius = item.radius,
+                            .material = load_material(proxy.materials[item.material]),
+                        },
+                    };
                 }
             } else if (obj.triangle) |item| {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{ .triangle = .{
-                        .va = item.va,
-                        .vb = item.vb,
-                        .vc = item.vc,
+                        .va = .{
+                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 0 },
+                            .texCoord = item.va.texCoord,
+                        },
+                        .vb = .{
+                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 0 },
+                            .texCoord = item.vb.texCoord,
+                        },
+                        .vc = .{
+                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 0 },
+                            .texCoord = item.vc.texCoord,
+                        },
                         .text = &conf.assets[item.textIdx],
                         .transform = transform_proxy_to_transform(trs),
                     } };
                 } else {
                     conf.objects[i] = Object{ .triangle = .{
-                        .va = item.va,
-                        .vb = item.vb,
-                        .vc = item.vc,
+                        .va = .{
+                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 0 },
+                            .texCoord = item.va.texCoord,
+                        },
+                        .vb = .{
+                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 0 },
+                            .texCoord = item.vb.texCoord,
+                        },
+                        .vc = .{
+                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 0 },
+                            .texCoord = item.vc.texCoord,
+                        },
                         .text = &conf.assets[item.textIdx],
                     } };
                 }
@@ -191,9 +270,16 @@ pub const Config = struct {
         }
         for (proxy.lights, 0..) |obj, i| {
             if (obj.point) |item| {
-                conf.lights[i] = Light{ .point_light = item };
+                conf.lights[i] = Light{ .point_light = .{
+                    .color = .{ item.color.r, item.color.g, item.color.b, 0 },
+                    .intensity = item.intensity,
+                    .position = .{ item.position.x, item.position.y, item.position.z, 0 },
+                } };
             } else if (obj.ambient) |item| {
-                conf.lights[i] = Light{ .ambient_light = item };
+                conf.lights[i] = Light{ .ambient_light = .{
+                    .color = .{ item.color.r, item.color.g, item.color.b, 0 },
+                    .intensity = item.intensity,
+                } };
             } else {
                 unreachable;
             }

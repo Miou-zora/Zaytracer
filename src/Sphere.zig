@@ -5,6 +5,7 @@ const HitRecord = @import("HitRecord.zig").HitRecord;
 const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const Transform = @import("Transform.zig").Transform;
+const zmath = @import("zmath");
 
 pub const Sphere = struct {
     const Self = @This();
@@ -15,27 +16,24 @@ pub const Sphere = struct {
     transform: ?Transform = null,
 
     pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const a: f32 = ray.direction.dot(ray.direction);
-        const b: f32 =
-            2 * (ray.direction.x * (ray.origin.x - self.origin.x) +
-            ray.direction.y * (ray.origin.y - self.origin.y) +
-            ray.direction.z * (ray.origin.z - self.origin.z));
-        const ro_minus_origin = ray.origin.subVec3(self.origin);
-        const c: f32 = ro_minus_origin.mulVec3(ro_minus_origin).sum() - self.radius * self.radius;
+        const a: f32 = @reduce(.Add, ray.direction * ray.direction);
+        const b: f32 = 2 * @reduce(.Add, ray.direction * (ray.origin - self.origin));
+        const ro_minus_origin = ray.origin - self.origin;
+        const c: f32 = @reduce(.Add, ro_minus_origin * ro_minus_origin) - self.radius * self.radius;
         const delta: f32 = b * b - 4 * a * c;
         if (delta < 0) {
             return HitRecord.nil();
         } else if (delta == 0) {
             const t = -b / (2 * a);
-            const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
+            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
             if (t < 0) {
                 return HitRecord.nil();
             } else {
                 return HitRecord{
                     .hit = true,
-                    .normal = intersection_point.subVec3(self.origin),
+                    .normal = intersection_point - self.origin,
                     .intersection_point = intersection_point,
-                    .t = intersection_point.distance(ray.origin),
+                    .t = zmath.length3(intersection_point - ray.origin)[0],
                     .material = self.material,
                 };
             }
@@ -46,15 +44,15 @@ pub const Sphere = struct {
                 return HitRecord.nil();
             }
             const t = if (t1 < t2 and t1 > 0) t1 else t2;
-            const intersection_point = ray.origin.addVec3(ray.direction.mulf32(t));
+            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
             if (t < 0) {
                 return HitRecord.nil();
             } else {
                 return HitRecord{
                     .hit = true,
-                    .normal = intersection_point.subVec3(self.origin),
+                    .normal = intersection_point - self.origin,
                     .intersection_point = intersection_point,
-                    .t = intersection_point.distance(ray.origin),
+                    .t = zmath.length3(intersection_point - ray.origin)[0],
                     .material = self.material,
                 };
             }
@@ -64,36 +62,36 @@ pub const Sphere = struct {
 
 test "hit" {
     const sphere = Sphere{
-        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
+        .origin = zmath.f32x4(0, 0, 0, 1),
         .radius = 1,
         .material = Material.nil(),
         .transform = null,
     };
     const ray = Ray{
-        .origin = Pt3{ .x = 0, .y = 0, .z = 2 },
-        .direction = Pt3{ .x = 0, .y = 0, .z = -1 },
+        .origin = zmath.f32x4(0, 0, 2, 1),
+        .direction = zmath.f32x4(0, 0, -1, 0),
     };
-
     const hit = sphere.hits(ray);
     try std.testing.expect(hit.hit);
-    try std.testing.expect(hit.intersection_point.x == 0);
-    try std.testing.expect(hit.intersection_point.y == 0);
-    try std.testing.expect(hit.intersection_point.z == 1);
-    try std.testing.expect(hit.normal.x == 0);
-    try std.testing.expect(hit.normal.y == 0);
-    try std.testing.expect(hit.normal.z == 1);
+    try std.testing.expect(hit.intersection_point[0] == 0);
+    try std.testing.expect(hit.intersection_point[1] == 0);
+    try std.testing.expect(hit.intersection_point[2] == 1);
+    try std.testing.expect(hit.normal[0] == 0);
+    try std.testing.expect(hit.normal[1] == 0);
+    try std.testing.expect(hit.normal[2] == 1);
+    try std.testing.expect(hit.t == 1);
 }
 
 test "dontHit" {
     const sphere = Sphere{
-        .origin = Pt3{ .x = 100, .y = 100, .z = 100 },
+        .origin = zmath.f32x4(100, 100, 100, 1),
         .radius = 1,
         .material = Material.nil(),
         .transform = null,
     };
     const ray = Ray{
-        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
-        .direction = Pt3{ .x = 0, .y = 0, .z = -1 },
+        .origin = zmath.f32x4(0, 0, 0, 1),
+        .direction = zmath.f32x4(0, 0, -1, 0),
     };
 
     const hit = sphere.hits(ray);
@@ -102,24 +100,25 @@ test "dontHit" {
 
 test "limit" {
     const sphere = Sphere{
-        .origin = Pt3{ .x = 0, .y = 0, .z = 0 },
+        .origin = zmath.f32x4(0, 0, 0, 1),
         .radius = 1,
         .material = Material.nil(),
         .transform = null,
     };
     const ray = Ray{
-        .origin = Pt3{ .x = 0, .y = -1, .z = -1 },
-        .direction = Pt3{ .x = 0, .y = 0, .z = 1 },
+        .origin = zmath.f32x4(0, -1, -1, 1),
+        .direction = zmath.f32x4(0, 0, 1, 0),
     };
 
     const hit = sphere.hits(ray);
     try std.testing.expect(hit.hit);
-    try std.testing.expect(hit.intersection_point.x == 0);
-    try std.testing.expect(hit.intersection_point.y == -1);
-    try std.testing.expect(hit.intersection_point.z == 0);
-    try std.testing.expect(hit.normal.x == 0);
-    try std.testing.expect(hit.normal.y == -1);
-    try std.testing.expect(hit.normal.z == 0);
+    try std.testing.expect(hit.intersection_point[0] == 0);
+    try std.testing.expect(hit.intersection_point[1] == -1);
+    try std.testing.expect(hit.intersection_point[2] == 0);
+    try std.testing.expect(hit.normal[0] == 0);
+    try std.testing.expect(hit.normal[1] == -1);
+    try std.testing.expect(hit.normal[2] == 0);
+    try std.testing.expect(hit.t == 1);
 }
 
 test {
