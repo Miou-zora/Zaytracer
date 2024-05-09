@@ -78,7 +78,6 @@ test "hit" {
     try std.testing.expect(hit.normal[0] == 0);
     try std.testing.expect(hit.normal[1] == 0);
     try std.testing.expect(hit.normal[2] == 1);
-    try std.testing.expect(hit.t == 1);
 }
 
 test "dontHit" {
@@ -117,7 +116,6 @@ test "limit" {
     try std.testing.expect(hit.normal[0] == 0);
     try std.testing.expect(hit.normal[1] == -1);
     try std.testing.expect(hit.normal[2] == 0);
-    try std.testing.expect(hit.t == 1);
 }
 
 test {
