@@ -6,18 +6,14 @@ const zmath = @import("zmath");
 pub const HitRecord = struct {
     const Self = @This();
 
-    hit: bool,
     normal: Vec3,
     intersection_point: Pt3,
-    t: f32,
     material: Material,
 
-    pub inline fn nil() Self {
+    pub fn nil() Self {
         return Self{
-            .hit = false,
             .normal = zmath.f32x4s(0),
             .intersection_point = zmath.f32x4s(0),
-            .t = 0,
             .material = Material.nil(),
         };
     }

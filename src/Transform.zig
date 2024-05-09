@@ -1,6 +1,7 @@
 const zmath = @import("zmath");
 const Ray = @import("Ray.zig").Ray;
 const HitRecord = @import("HitRecord.zig").HitRecord;
+const Payload = @import("Payload.zig").Payload;
 
 pub const Transform = struct {
     const Self = @This();
@@ -44,11 +45,13 @@ pub const Transform = struct {
         const transformed_normal = zmath.mul(zmath.f32x4(ray.normal[0], ray.normal[1], ray.normal[2], 0), self.inv_mat);
 
         return HitRecord{
-            .hit = ray.hit,
             .intersection_point = transformed_intersection_point,
             .normal = transformed_normal,
-            .t = ray.t,
             .material = ray.material,
         };
+    }
+
+    pub inline fn compute_pl_world_pt(self: *const Self, payload: *Payload) void {
+        payload.intersection_point_world = zmath.mul(zmath.f32x4(payload.intersection_point_obj[0], payload.intersection_point_obj[1], payload.intersection_point_obj[2], 1), self.inv_mat);
     }
 };

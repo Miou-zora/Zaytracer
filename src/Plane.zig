@@ -7,6 +7,7 @@ const Vec = zmath.Vec;
 const Material = @import("Material.zig").Material;
 const Transform = @import("Transform.zig").Transform;
 const Vec3 = @import("Vec3.zig").Vec3;
+const Payload = @import("Payload.zig").Payload;
 
 pub const Plane = struct {
     const Self = @This();
@@ -20,25 +21,28 @@ pub const Plane = struct {
         self.transform.deinit();
     }
 
-    pub fn hits(self: *const Self, ray: Ray) HitRecord {
-        const denom: f32 = zmath.dot3(self.normal, ray.direction)[0];
+    pub fn hits(self: *const Self, ray: Ray, payload: *Payload) bool {
+        const denom: Vec3 = zmath.dot3(self.normal, ray.direction);
 
-        if (denom == 0.0) {
-            return HitRecord.nil();
+        if (denom[0] == 0.0) {
+            return false;
         }
 
-        const t: f32 = zmath.dot3(self.origin - ray.origin, self.normal)[0] / denom;
+        const t = zmath.dot3(self.origin - ray.origin, self.normal) / denom;
 
-        if (t < 0.0) {
-            return HitRecord.nil();
+        if (t[0] < 0.0) {
+            return false;
         }
 
-        const hit_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
+        const hit_point = zmath.mulAdd(ray.direction, t, ray.origin);
+        payload.intersection_point_obj = hit_point;
+        return true;
+    }
+
+    pub fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
         return HitRecord{
-            .hit = true,
-            .intersection_point = hit_point,
+            .intersection_point = obj_pt.*,
             .normal = self.normal,
-            .t = 0,
             .material = self.material,
         };
     }

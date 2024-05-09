@@ -15,17 +15,23 @@ const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Material = @import("Material.zig").Material;
 const Config = @import("Config.zig").Config;
 const zmath = @import("zmath");
+const Payload = @import("Payload.zig").Payload;
 
 const EPSILON: f32 = 0.00001;
 
 pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, ray: Ray, material: Material) ColorRGB {
     var lighting: ColorRGB = zmath.f32x4(0, 0, 0, 255);
+    var tmp_pl: Payload = .{
+        .intersection_point_world = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .intersection_point_obj = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .obj = &scene.objects.items[0],
+    };
     for (scene.lights.items) |light| {
         switch (light) {
             .point_light => |item| {
                 const L = zmath.normalize3(item.position - intersection);
-                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), normal, intersection) }, EPSILON, zmath.length3(item.position - intersection)[0]);
-                if (closest_hit.hit) {
+                const closest_hit = find_closest_intersection(scene, Ray{ .direction = L, .origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), normal, intersection) }, EPSILON, zmath.length3(item.position - intersection)[0], &tmp_pl);
+                if (closest_hit) {
                     continue;
                 }
                 const n_dot_l = zmath.dot3(normal, L);
@@ -52,11 +58,18 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
     return zmath.clampFast(lighting, @as(ColorRGB, @splat(0)), @as(ColorRGB, @splat(255)));
 }
 
-fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32) HitRecord {
-    var closest_hit: HitRecord = HitRecord.nil();
-    for (scene.objects.items) |object|
-        object.fetch_closest_object(&closest_hit, ray, t_min, t_max);
-    return closest_hit;
+fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f32, closest_hit: *Payload) bool {
+    var hit = false;
+    var tmp_pl: Payload = .{
+        .intersection_point_world = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .intersection_point_obj = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .obj = &scene.objects.items[0],
+    };
+    for (scene.objects.items) |object| {
+        tmp_pl.obj = &object;
+        hit = hit or object.fetch_closest_object(closest_hit, ray, t_min, t_max, &tmp_pl);
+    }
+    return hit;
 }
 
 fn reflect(v: Vec3, n: Vec3) Vec3 {
@@ -64,23 +77,27 @@ fn reflect(v: Vec3, n: Vec3) Vec3 {
 }
 
 fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recursion_depth: usize) ColorRGB {
-    const closest_hit = find_closest_intersection(scene, ray, std.math.floatMin(f32), std.math.floatMax(f32));
-
-    if (!closest_hit.hit) {
+    var closest_hit: Payload = .{
+        .intersection_point_world = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .intersection_point_obj = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+        .obj = &scene.objects.items[0],
+    };
+    if (!find_closest_intersection(scene, ray, std.math.floatMin(f32), std.math.floatMax(f32), &closest_hit))
         return zmath.f32x4s(0);
-    }
-    const norm = zmath.normalize3(closest_hit.normal);
-    const inter = closest_hit.intersection_point;
-    const material = closest_hit.material;
+
+    const hitRecord = closest_hit.obj.to_hitRecord(&closest_hit.intersection_point_obj);
+    const norm = zmath.normalize3(hitRecord.normal);
+    const inter = hitRecord.intersection_point;
+    const material = hitRecord.material;
     const light_color = compute_lighting(inter, norm, scene, ray, material);
     const color = material.color * light_color / @as(zmath.Vec, @splat(255));
-    const reflective = closest_hit.material.reflective;
+    const reflective = hitRecord.material.reflective;
     if (recursion_depth <= 0 or reflective <= 0) {
         return color;
     }
 
     const R = reflect(-ray.direction, norm);
-    const new_origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), norm, closest_hit.intersection_point);
+    const new_origin = zmath.mulAdd(@as(Vec3, @splat(EPSILON)), norm, hitRecord.intersection_point);
     const reflected_color = get_pixel_color(
         Ray{
             .direction = R,

@@ -12,6 +12,7 @@ const zmath = @import("zmath");
 const Pt3 = @import("Pt3.zig").Pt3;
 const Transform = @import("Transform.zig").Transform;
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
+const Payload = @import("Payload.zig").Payload;
 
 pub const Triangle = struct {
     const Self = @This();
@@ -22,7 +23,7 @@ pub const Triangle = struct {
     text: *const Image,
     transform: ?Transform = null,
 
-    pub fn hits(self: *const Self, ray: Ray) HitRecord {
+    pub fn hits(self: *const Self, ray: Ray, payload: *Payload) bool {
         // TODO: add bvh + compute this only one time
         const a = self.va.position;
         const b = self.vb.position;
@@ -34,10 +35,11 @@ pub const Triangle = struct {
         const t = zmath.dot3(normal, (a - ray.origin)) / zmath.dot3(normal, ray.direction);
 
         if (t[0] < 0) {
-            return HitRecord.nil();
+            return false;
         }
 
         const hit_point = zmath.mulAdd(ray.direction, t, ray.origin);
+        payload.intersection_point_obj = hit_point;
 
         const aSubc = a - c;
         const cSubb = c - b;
@@ -46,9 +48,24 @@ pub const Triangle = struct {
         const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
         const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
 
-        if (u < 0 or v < 0 or w < 0) {
-            return HitRecord.nil();
-        }
+        return (!(u < 0 or v < 0 or w < 0));
+    }
+
+    pub fn to_hitRecord(self: *const Self, pt: *const Pt3) HitRecord {
+        const hit_point = pt.*;
+        const a = self.va.position;
+        const b = self.vb.position;
+        const c = self.vc.position;
+        const aSubc = a - c;
+        const cSubb = c - b;
+        const bSuba = b - a;
+        const cSuba = c - a;
+        const normal = zmath.normalize3(zmath.cross3(bSuba, cSuba));
+
+        const u = zmath.dot3(zmath.cross3(bSuba, hit_point - a), normal)[0];
+        const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
+        const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
+
         const barycentric = zmath.f32x4(u, v, w, 0);
         const texCoord1 = zmath.f32x4(self.va.texCoord[0], self.vb.texCoord[0], self.vc.texCoord[0], 0); // Is it efficient to store this in tmp const?
         const texCoord2 = zmath.f32x4(self.va.texCoord[1], self.vb.texCoord[1], self.vc.texCoord[1], 0); // same
@@ -66,8 +83,6 @@ pub const Triangle = struct {
             .specular = 0,
         };
         return HitRecord{
-            .hit = true,
-            .t = 0,
             .intersection_point = hit_point,
             .normal = normal,
             .material = material,

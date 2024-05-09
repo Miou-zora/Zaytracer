@@ -7,39 +7,37 @@ const Plane = @import("Plane.zig").Plane;
 const std = @import("std");
 const Triangle = @import("Triangle.zig").Triangle;
 const HitRecord = @import("HitRecord.zig").HitRecord;
+const Payload = @import("Payload.zig").Payload;
 const Ray = @import("Ray.zig").Ray;
 const zmath = @import("zmath");
+const Pt3 = @import("Pt3.zig").Pt3;
 const rl = @cImport({
     @cInclude("raylib.h");
 });
 
-fn compute_record_with_transform(obj: anytype, ray: Ray) HitRecord {
+fn compute_record_with_transform(obj: anytype, ray: Ray, tmp_payload: *Payload) bool {
     if (obj.transform) |transform| {
-        const record = transform.hitRecord_object_to_global(obj.hits(transform.ray_global_to_object(&ray)));
-        return .{
-            .hit = record.hit,
-            .t = zmath.length3(record.intersection_point - ray.origin)[0],
-            .intersection_point = record.intersection_point,
-            .normal = record.normal,
-            .material = record.material,
-        };
+        if (obj.hits(transform.ray_global_to_object(&ray), tmp_payload)) {
+            transform.compute_pl_world_pt(tmp_payload);
+            return true;
+        }
+        return false;
     } else {
-        const record = obj.hits(ray);
-        return .{
-            .hit = record.hit,
-            .t = zmath.length3(record.intersection_point - ray.origin)[0],
-            .intersection_point = record.intersection_point,
-            .normal = record.normal,
-            .material = record.material,
-        };
+        return obj.hits(ray, tmp_payload);
     }
 }
 
-fn fetch_closest_object_with_transform(obj: anytype, closest_hit: *HitRecord, ray: Ray, t_min: f32, t_max: f32) void {
-    const record = compute_record_with_transform(obj, ray);
-    if (record.hit and (!closest_hit.hit or record.t < closest_hit.t) and record.t > t_min and record.t < t_max) {
-        closest_hit.* = record;
+fn fetch_closest_object_with_transform(obj: anytype, closest_hit: *Payload, ray: Ray, t_min: f32, t_max: f32, tmp_payload: *Payload) bool {
+    if (!compute_record_with_transform(obj, ray, tmp_payload)) {
+        return false;
     }
+    const dist: f32 = zmath.length3(tmp_payload.intersection_point_world - ray.origin)[0];
+    const current_dist: f32 = zmath.length3(closest_hit.intersection_point_world - ray.origin)[0]; // do not compute this all the time
+    if ((dist < current_dist) and dist > t_min and dist < t_max) {
+        closest_hit.intersection_point_obj = tmp_payload.intersection_point_obj;
+        closest_hit.intersection_point_world = tmp_payload.intersection_point_world;
+    }
+    return true;
 }
 
 pub const SceneObject = union(enum) {
@@ -50,19 +48,44 @@ pub const SceneObject = union(enum) {
     cylinder: Cylinder,
     triangle: Triangle,
 
-    pub inline fn fetch_closest_object(self: *const Self, current_closest_hit: *HitRecord, ray: Ray, t_min: f32, t_max: f32) void {
+    pub inline fn fetch_closest_object(self: *const Self, current_closest_hit: *Payload, ray: Ray, t_min: f32, t_max: f32, tmp_payload: *Payload) bool {
         switch (self.*) {
             .sphere => |item| {
-                fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
+                return fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max, tmp_payload);
             },
             .plane => |item| {
-                fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
+                return fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max, tmp_payload);
             },
             .cylinder => |item| {
-                fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
+                return fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max, tmp_payload);
             },
             .triangle => |item| {
-                fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max);
+                return fetch_closest_object_with_transform(item, current_closest_hit, ray, t_min, t_max, tmp_payload);
+            },
+        }
+    }
+
+    fn load_hitRecord(obj: anytype, obj_pt: *const Pt3) HitRecord {
+        if (obj.transform) |transform| {
+            return transform.hitRecord_object_to_global(obj.to_hitRecord(obj_pt));
+        } else {
+            return obj.to_hitRecord(obj_pt);
+        }
+    }
+
+    pub inline fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
+        switch (self.*) {
+            .sphere => |item| {
+                return load_hitRecord(item, obj_pt);
+            },
+            .plane => |item| {
+                return load_hitRecord(item, obj_pt);
+            },
+            .cylinder => |item| {
+                return load_hitRecord(item, obj_pt);
+            },
+            .triangle => |item| {
+                return load_hitRecord(item, obj_pt);
             },
         }
     }
