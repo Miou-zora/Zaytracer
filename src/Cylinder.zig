@@ -24,38 +24,19 @@ pub const Cylinder = struct {
         const delta = b * b - 4.0 * a * c;
         if (delta < 0.0 or a == 0.0) {
             return HitRecord.nil();
-        } else if (delta == 0) {
-            const t = -b / (2.0 * a);
-            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
-            if (t < 0.0) {
-                return HitRecord.nil();
-            } else {
-                const normal = intersection_point - self.origin;
-                return HitRecord{
-                    .hit = true,
-                    .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
-                    .intersection_point = intersection_point,
-                    .t = 0,
-                    .material = self.material,
-                };
-            }
-        } else {
-            const t1 = (-b + @sqrt(delta)) / (2.0 * a);
-            const t2 = (-b - @sqrt(delta)) / (2.0 * a);
-            if (t1 < 0 and t2 < 0) {
-                return HitRecord.nil();
-            }
-            const t = if (t1 < t2 and t1 > 0) t1 else t2;
-            const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
-            const normal = intersection_point - self.origin;
-            return HitRecord{
-                .hit = true,
-                .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
-                .intersection_point = intersection_point,
-                .t = 0,
-                .material = self.material,
-            };
         }
+        const t = (-b - @sqrt(delta)) / (2.0 * a);
+        if (t < 0)
+            return HitRecord.nil();
+        const intersection_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
+        const normal = intersection_point - self.origin;
+        return HitRecord{
+            .hit = true,
+            .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
+            .intersection_point = intersection_point,
+            .t = 0,
+            .material = self.material,
+        };
     }
 };
 

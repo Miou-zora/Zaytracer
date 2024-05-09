@@ -37,6 +37,37 @@
             }
         },
         {
+            "sphere": {
+                "origin": {
+                    "x": 1,
+                    "y": -0.5,
+                    "z": 5
+                },
+                "radius": 0.5,
+                "material": 1
+            }
+        },
+        {
+            "sphere": {
+                "origin": {
+                    "x": 1,
+                    "y": 0.5,
+                    "z": 5
+                },
+                "radius": 0.3,
+                "material": 1,
+                "transforms": [
+                    {
+                        "scale": {
+                            "x": 0.5,
+                            "y": 2,
+                            "z": 0.9
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "plane": {
                 "origin": {
                     "x": 0,
