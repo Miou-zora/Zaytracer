@@ -31,10 +31,10 @@ pub const Sphere = struct {
         return true;
     }
 
-    pub fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
+    pub fn to_hitRecord(self: *const Self, obj_pt: Pt3) HitRecord {
         return HitRecord{
-            .normal = obj_pt.* - self.origin,
-            .intersection_point = obj_pt.*,
+            .normal = obj_pt - self.origin,
+            .intersection_point = obj_pt,
             .material = self.material,
         };
     }

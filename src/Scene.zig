@@ -21,10 +21,13 @@ fn compute_record_with_transform(obj: anytype, ray: Ray, tmp_payload: *Payload) 
             transform.compute_pl_world_pt(tmp_payload);
             return true;
         }
-        return false;
     } else {
-        return obj.hits(ray, tmp_payload);
+        if (obj.hits(ray, tmp_payload)) {
+            tmp_payload.intersection_point_world = tmp_payload.intersection_point_obj;
+            return true;
+        }
     }
+    return false;
 }
 
 fn fetch_closest_object_with_transform(obj: anytype, closest_hit: *Payload, ray: Ray, t_min: f32, t_max: f32, tmp_payload: *Payload) bool {
@@ -33,11 +36,12 @@ fn fetch_closest_object_with_transform(obj: anytype, closest_hit: *Payload, ray:
     }
     const dist: f32 = zmath.length3(tmp_payload.intersection_point_world - ray.origin)[0];
     const current_dist: f32 = zmath.length3(closest_hit.intersection_point_world - ray.origin)[0]; // do not compute this all the time
-    if ((dist < current_dist) and dist > t_min and dist < t_max) {
+    if (dist < current_dist and dist > t_min and dist < t_max) {
         closest_hit.intersection_point_obj = tmp_payload.intersection_point_obj;
         closest_hit.intersection_point_world = tmp_payload.intersection_point_world;
+        return true;
     }
-    return true;
+    return false;
 }
 
 pub const SceneObject = union(enum) {
@@ -65,7 +69,7 @@ pub const SceneObject = union(enum) {
         }
     }
 
-    fn load_hitRecord(obj: anytype, obj_pt: *const Pt3) HitRecord {
+    fn load_hitRecord(obj: anytype, obj_pt: Pt3) HitRecord {
         if (obj.transform) |transform| {
             return transform.hitRecord_object_to_global(obj.to_hitRecord(obj_pt));
         } else {
@@ -73,7 +77,7 @@ pub const SceneObject = union(enum) {
         }
     }
 
-    pub inline fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
+    pub inline fn to_hitRecord(self: *const Self, obj_pt: Pt3) HitRecord {
         switch (self.*) {
             .sphere => |item| {
                 return load_hitRecord(item, obj_pt);

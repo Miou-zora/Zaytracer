@@ -34,11 +34,11 @@ pub const Cylinder = struct {
         return true;
     }
 
-    pub fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
-        const normal = obj_pt.* - self.origin;
+    pub fn to_hitRecord(self: *const Self, obj_pt: Pt3) HitRecord {
+        const normal = obj_pt - self.origin;
         return HitRecord{
             .normal = zmath.f32x4(normal[0], normal[1], 0, 0),
-            .intersection_point = obj_pt.*,
+            .intersection_point = obj_pt,
             .material = self.material,
         };
     }

@@ -27,6 +27,11 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
         .obj = &scene.objects.items[0],
     };
     for (scene.lights.items) |light| {
+        tmp_pl = .{
+            .intersection_point_world = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+            .intersection_point_obj = zmath.f32x4(std.math.floatMax(f32), 0, 0, 0),
+            .obj = &scene.objects.items[0],
+        };
         switch (light) {
             .point_light => |item| {
                 const L = zmath.normalize3(item.position - intersection);
@@ -66,8 +71,10 @@ fn find_closest_intersection(scene: *Scene.Scene, ray: Ray, t_min: f32, t_max: f
         .obj = &scene.objects.items[0],
     };
     for (scene.objects.items) |object| {
-        tmp_pl.obj = &object;
-        hit = hit or object.fetch_closest_object(closest_hit, ray, t_min, t_max, &tmp_pl);
+        if (object.fetch_closest_object(closest_hit, ray, t_min, t_max, &tmp_pl)) {
+            hit = true;
+            closest_hit.obj = &object;
+        }
     }
     return hit;
 }
@@ -85,7 +92,7 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
     if (!find_closest_intersection(scene, ray, std.math.floatMin(f32), std.math.floatMax(f32), &closest_hit))
         return zmath.f32x4s(0);
 
-    const hitRecord = closest_hit.obj.to_hitRecord(&closest_hit.intersection_point_obj);
+    const hitRecord = closest_hit.obj.to_hitRecord(closest_hit.intersection_point_obj);
     const norm = zmath.normalize3(hitRecord.normal);
     const inter = hitRecord.intersection_point;
     const material = hitRecord.material;
@@ -135,7 +142,7 @@ fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32,
 }
 
 fn calculate_image(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32, allocator: std.mem.Allocator) !void {
-    const num_threads = try std.Thread.getCpuCount();
+    const num_threads = 1;
     var threads = try allocator.alloc(std.Thread, num_threads);
 
     for (0..num_threads) |i|

@@ -39,9 +39,9 @@ pub const Plane = struct {
         return true;
     }
 
-    pub fn to_hitRecord(self: *const Self, obj_pt: *const Pt3) HitRecord {
+    pub fn to_hitRecord(self: *const Self, obj_pt: Pt3) HitRecord {
         return HitRecord{
-            .intersection_point = obj_pt.*,
+            .intersection_point = obj_pt,
             .normal = self.normal,
             .material = self.material,
         };

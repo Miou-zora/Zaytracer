@@ -184,40 +184,40 @@
     ],
     "materials": [
         {
-            "specular": 100,
+            "specular": 0,
             "color": {
-                "r": 200,
+                "r": 100,
                 "g": 0,
-                "b": 200
+                "b": 0
             },
-            "reflective": 0.5
+            "reflective": 0
         },
         {
             "specular": 0,
             "color": {
-                "r": 200,
-                "g": 200,
-                "b": 200
-            },
-            "reflective": 1
-        },
-        {
-            "specular": 100,
-            "color": {
                 "r": 0,
-                "g": 255,
+                "g": 200,
                 "b": 0
             },
-            "reflective": 0.5
+            "reflective": 0
         },
         {
-            "specular": 100,
+            "specular": 0,
             "color": {
                 "r": 0,
                 "g": 0,
+                "b": 200
+            },
+            "reflective": 0
+        },
+        {
+            "specular": 0.5,
+            "color": {
+                "r": 0,
+                "g": 255,
                 "b": 255
             },
-            "reflective": 0.5
+            "reflective": 0
         }
     ],
     "lights": [

@@ -39,7 +39,6 @@ pub const Triangle = struct {
         }
 
         const hit_point = zmath.mulAdd(ray.direction, t, ray.origin);
-        payload.intersection_point_obj = hit_point;
 
         const aSubc = a - c;
         const cSubb = c - b;
@@ -48,11 +47,14 @@ pub const Triangle = struct {
         const v = zmath.dot3(zmath.cross3(cSubb, hit_point - b), normal)[0];
         const w = zmath.dot3(zmath.cross3(aSubc, hit_point - c), normal)[0];
 
-        return (!(u < 0 or v < 0 or w < 0));
+        if (u < 0 or v < 0 or w < 0) {
+            return false;
+        }
+        payload.intersection_point_obj = hit_point;
+        return true;
     }
 
-    pub fn to_hitRecord(self: *const Self, pt: *const Pt3) HitRecord {
-        const hit_point = pt.*;
+    pub fn to_hitRecord(self: *const Self, hit_point: Pt3) HitRecord {
         const a = self.va.position;
         const b = self.vb.position;
         const c = self.vc.position;
@@ -69,6 +71,7 @@ pub const Triangle = struct {
         const barycentric = zmath.f32x4(u, v, w, 0);
         const texCoord1 = zmath.f32x4(self.va.texCoord[0], self.vb.texCoord[0], self.vc.texCoord[0], 0); // Is it efficient to store this in tmp const?
         const texCoord2 = zmath.f32x4(self.va.texCoord[1], self.vb.texCoord[1], self.vc.texCoord[1], 0); // same
+
         const posInImage: @Vector(2, usize) = .{
             @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord1) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.width)))),
             @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord2) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
