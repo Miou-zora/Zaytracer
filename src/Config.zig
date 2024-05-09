@@ -183,7 +183,7 @@ pub const Config = struct {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{
                         .sphere = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
                             .radius = item.radius,
                             .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
@@ -192,7 +192,7 @@ pub const Config = struct {
                 } else {
                     conf.objects[i] = Object{
                         .sphere = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
                             .radius = item.radius,
                             .material = load_material(proxy.materials[item.material]),
                         },
@@ -202,8 +202,8 @@ pub const Config = struct {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{
                         .plane = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
-                            .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
+                            .normal = .{ item.normal.x, item.normal.y, item.normal.z, 1 },
                             .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
                         },
@@ -211,7 +211,7 @@ pub const Config = struct {
                 } else {
                     conf.objects[i] = Object{
                         .plane = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
                             .normal = .{ item.normal.x, item.normal.y, item.normal.z, 0 },
                             .material = load_material(proxy.materials[item.material]),
                         },
@@ -221,7 +221,7 @@ pub const Config = struct {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{
                         .cylinder = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
                             .radius = item.radius,
                             .material = load_material(proxy.materials[item.material]),
                             .transform = transform_proxy_to_transform(trs),
@@ -230,7 +230,7 @@ pub const Config = struct {
                 } else {
                     conf.objects[i] = Object{
                         .cylinder = .{
-                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 0 },
+                            .origin = .{ item.origin.x, item.origin.y, item.origin.z, 1 },
                             .radius = item.radius,
                             .material = load_material(proxy.materials[item.material]),
                         },
@@ -240,15 +240,15 @@ pub const Config = struct {
                 if (item.transforms) |trs| {
                     conf.objects[i] = Object{ .triangle = .{
                         .va = .{
-                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 0 },
+                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 1 },
                             .texCoord = item.va.texCoord,
                         },
                         .vb = .{
-                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 0 },
+                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 1 },
                             .texCoord = item.vb.texCoord,
                         },
                         .vc = .{
-                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 0 },
+                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 1 },
                             .texCoord = item.vc.texCoord,
                         },
                         .text = &conf.assets[item.textIdx],
@@ -257,15 +257,15 @@ pub const Config = struct {
                 } else {
                     conf.objects[i] = Object{ .triangle = .{
                         .va = .{
-                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 0 },
+                            .position = .{ item.va.position.x, item.va.position.y, item.va.position.z, 1 },
                             .texCoord = item.va.texCoord,
                         },
                         .vb = .{
-                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 0 },
+                            .position = .{ item.vb.position.x, item.vb.position.y, item.vb.position.z, 1 },
                             .texCoord = item.vb.texCoord,
                         },
                         .vc = .{
-                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 0 },
+                            .position = .{ item.vc.position.x, item.vc.position.y, item.vc.position.z, 1 },
                             .texCoord = item.vc.texCoord,
                         },
                         .text = &conf.assets[item.textIdx],
@@ -280,7 +280,7 @@ pub const Config = struct {
                 conf.lights[i] = Light{ .point_light = .{
                     .color = .{ item.color.r, item.color.g, item.color.b, 0 },
                     .intensity = item.intensity,
-                    .position = .{ item.position.x, item.position.y, item.position.z, 0 },
+                    .position = .{ item.position.x, item.position.y, item.position.z, 1 },
                 } };
             } else if (obj.ambient) |item| {
                 conf.lights[i] = Light{ .ambient_light = .{

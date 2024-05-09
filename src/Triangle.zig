@@ -31,13 +31,13 @@ pub const Triangle = struct {
         const cSuba = c - a;
 
         const normal = zmath.normalize3(zmath.cross3(bSuba, cSuba));
-        const t: f32 = @reduce(.Add, (normal * (a - ray.origin))) / @reduce(.Add, normal * ray.direction);
+        const t = zmath.dot3(normal, (a - ray.origin)) / zmath.dot3(normal, ray.direction);
 
-        if (t < 0) {
+        if (t[0] < 0) {
             return HitRecord.nil();
         }
 
-        const hit_point = zmath.mulAdd(ray.direction, @as(Vec3, @splat(t)), ray.origin);
+        const hit_point = zmath.mulAdd(ray.direction, t, ray.origin);
 
         const aSubc = a - c;
         const cSubb = c - b;

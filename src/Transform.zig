@@ -30,8 +30,8 @@ pub const Transform = struct {
     }
 
     pub inline fn ray_global_to_object(self: *const Self, ray: *const Ray) Ray {
-        const transformed_origin = zmath.mul(zmath.f32x4(ray.origin[0], ray.origin[1], ray.origin[2], 1), self.mat);
-        const transformed_direction = zmath.mul(zmath.f32x4(ray.direction[0], ray.direction[1], ray.direction[2], 0), self.inv_trans_mat);
+        const transformed_origin = zmath.mul(zmath.f32x4(ray.origin[0], ray.origin[1], ray.origin[2], 1), self.mat); // It's a little strange that we need to set 1 for w
+        const transformed_direction = zmath.mul(zmath.f32x4(ray.direction[0], ray.direction[1], ray.direction[2], 0), self.inv_trans_mat); // Same
 
         return Ray{
             .origin = transformed_origin,
@@ -45,7 +45,7 @@ pub const Transform = struct {
 
         return HitRecord{
             .hit = ray.hit,
-            .intersection_point = zmath.f32x4(transformed_intersection_point[0], transformed_intersection_point[1], transformed_intersection_point[2], 0), // TODO: find why we need to set the w to 0
+            .intersection_point = transformed_intersection_point,
             .normal = transformed_normal,
             .t = ray.t,
             .material = ray.material,
