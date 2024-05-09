@@ -35,7 +35,7 @@ pub fn compute_lighting(intersection: Vec3, normal: Vec3, scene: *Scene.Scene, r
                 }
                 lighting += item.color * em;
                 if (material.specular != -1) {
-                    const R = reflect(L, normal); // TODO: check tis
+                    const R = reflect(L, normal);
                     const V = zmath.normalize3(-ray.direction);
                     const r_dot_v = zmath.dot3(R, V);
                     if (r_dot_v[0] > 0) {
