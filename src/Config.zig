@@ -12,9 +12,7 @@ const PointLight = @import("Light.zig").Light;
 const Light = Scene.SceneLight;
 const Vertex = @import("Vertex.zig").Vertex;
 const Image = Scene.Image;
-const rl = @cImport({
-    @cInclude("raylib.h");
-});
+const rl = @import("raylib");
 const ColorRGB = @import("ColorRGB.zig").ColorRGB;
 const Transform = @import("Transform.zig").Transform;
 
@@ -172,10 +170,10 @@ pub const Config = struct {
             .assets = try allocator.alloc(Image, proxy.assets.len),
         };
         for (proxy.assets, 0..) |obj, i| {
-            const image = rl.LoadImage(obj.imageName);
+            const image = try rl.loadImage(obj.imageName);
             conf.assets[i] = Image{
                 .rlImage = image,
-                .rlColors = rl.LoadImageColors(image),
+                .rlColors = try rl.loadImageColors(image),
             };
         }
         for (proxy.objects, 0..) |obj, i| {

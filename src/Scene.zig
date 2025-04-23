@@ -9,9 +9,7 @@ const Triangle = @import("Triangle.zig").Triangle;
 const HitRecord = @import("HitRecord.zig").HitRecord;
 const Ray = @import("Ray.zig").Ray;
 const zmath = @import("zmath");
-const rl = @cImport({
-    @cInclude("raylib.h");
-});
+const rl = @import("raylib");
 
 fn compute_record_with_transform(obj: anytype, ray: Ray) HitRecord {
     if (obj.transform) |transform| {
@@ -75,7 +73,7 @@ pub const SceneLight = union(enum) {
 
 pub const Image = struct {
     rlImage: rl.Image,
-    rlColors: [*]rl.Color,
+    rlColors: []rl.Color,
 };
 
 pub const Asset = union(enum) {

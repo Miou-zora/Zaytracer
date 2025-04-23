@@ -1,32 +1,47 @@
-name: Build, test, and lint
+name: Build, test and lint
 
 on:
-  push:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{matrix.os}}
+        build_type: [Debug, ReleaseSafe, ReleaseFast]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: goto-bus-stop/setup-zig@v2
         with:
-          fetch-depth: 0
-      - uses: cachix/install-nix-action@v26
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
+          version: 0.14.0
+      - run: zig build -Doptimize=${{matrix.build_type}} --summary all
 
-      - run: nix build
+  test:
+    strategy:
+      matrix:
+        build_type: [Debug, ReleaseSafe, ReleaseFast]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.14.0
+      - run: zig build -Doptimize=${{matrix.build_type}} test --summary all
+
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: goto-bus-stop/setup-zig@v2
         with:
-          fetch-depth: 0
-      - uses: cachix/install-nix-action@v26
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-
-      - run: nix develop -c zig fmt --check .
+          version: 0.14.0
+      - run: zig fmt --check .
