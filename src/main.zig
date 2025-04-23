@@ -4,7 +4,7 @@ const Pt3 = @import("Pt3.zig").Pt3;
 const Ray = @import("Ray.zig").Ray;
 const Sphere = @import("Sphere.zig").Sphere;
 const Camera = @import("Camera.zig").Camera;
-const qoi = @import("qoi.zig");
+const qoi = @import("qoi");
 const Light = @import("Light.zig").Light;
 const AmbientLight = @import("AmbientLight.zig").AmbientLight;
 const Plane = @import("Plane.zig").Plane;
@@ -97,7 +97,7 @@ fn get_pixel_color(ray: Ray, scene: *Scene.Scene, height: u32, width: u32, recur
 var current_height: std.atomic.Value(u32) = std.atomic.Value(u32).init(0);
 
 fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
-    const recursion_depth = 5;
+    const recursion_depth = 20;
     while (true) {
         const y = current_height.fetchAdd(1, .monotonic);
         if (y >= height)

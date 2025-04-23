@@ -5,9 +5,7 @@ const Vec3 = @import("Vec3.zig").Vec3;
 const Material = @import("Material.zig").Material;
 const std = @import("std");
 const Image = @import("Scene.zig").Image;
-const rl = @cImport({
-    @cInclude("raylib.h");
-});
+const rl = @import("raylib");
 const zmath = @import("zmath");
 const Pt3 = @import("Pt3.zig").Pt3;
 const Transform = @import("Transform.zig").Transform;
