@@ -98,7 +98,7 @@ var current_height: std.atomic.Value(u32) = std.atomic.Value(u32).init(0);
 
 fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
     const recursion_depth = 20;
-    const samples_per_pixel: u32 = 10;
+    const samples_per_pixel: u32 = scene.camera.antialiasing_samples;
     var rng = std.Random.DefaultPrng.init(0);
     while (true) {
         const y = current_height.fetchAdd(1, .monotonic);

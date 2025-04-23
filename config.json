@@ -2,7 +2,8 @@
     "camera": {
         "width": 1920,
         "height": 1080,
-        "fov": 50
+        "fov": 50,
+        "antialiasing_samples": 10
     },
     "objects": [
         {
