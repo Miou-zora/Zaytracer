@@ -114,7 +114,7 @@ fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32,
                 const jittered_ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
                 pixel_color += get_pixel_color(jittered_ray, scene, height, width, recursion_depth);
             }
-            pixel_color /= @as(Vec3, @splat(@as(f32, @floatFromInt( samples_per_pixel))));
+            pixel_color /= @as(Vec3, @splat(@as(f32, @floatFromInt(samples_per_pixel))));
             pixels[x + y * width] = .{
                 .r = @as(u8, @intFromFloat(pixel_color[0])),
                 .g = @as(u8, @intFromFloat(pixel_color[1])),
