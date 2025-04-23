@@ -10,6 +10,7 @@ pub const Camera = struct {
     width: u32,
     height: u32,
     fov: f32,
+    antialiasing_samples: u32,
 
     pub fn createRay(self: *const Self, x: f32, y: f32) Ray {
         const aspectRatio = @as(f32, @floatFromInt(self.height)) / @as(f32, @floatFromInt(self.width));

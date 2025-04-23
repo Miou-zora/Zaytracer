@@ -55,7 +55,7 @@ pub const Triangle = struct {
             @as(usize, @intFromFloat(@reduce(.Add, barycentric * texCoord2) / @reduce(.Add, barycentric) * @as(f32, @floatFromInt(self.text.rlImage.height)))),
         };
         const cInt_to_usize = @as(usize, @intCast(self.text.rlImage.width));
-        const color: rl.Color = self.text.rlColors[posInImage[1] * cInt_to_usize + posInImage[0]];
+        const color: rl.Color = self.text.rlColors[@min(posInImage[1] * cInt_to_usize + posInImage[0], self.text.rlColors.len - 1)];
         const colorRGB: ColorRGB = zmath.f32x4(@as(f32, @floatFromInt(color.r)), @as(f32, @floatFromInt(color.g)), @as(f32, @floatFromInt(color.b)), 0);
 
         const material: Material = .{
