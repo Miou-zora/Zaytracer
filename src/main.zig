@@ -98,15 +98,23 @@ var current_height: std.atomic.Value(u32) = std.atomic.Value(u32).init(0);
 
 fn calculate_image_worker(pixels: []qoi.Color, scene: *Scene.Scene, height: u32, width: u32) !void {
     const recursion_depth = 20;
+    const samples_per_pixel: u32 = 10;
+    var rng = std.Random.DefaultPrng.init(0);
     while (true) {
         const y = current_height.fetchAdd(1, .monotonic);
         if (y >= height)
             return;
         for (0..width) |x| {
-            const scaled_x: f32 = @as(f32, @floatFromInt(x)) / @as(f32, @floatFromInt(width));
-            const scaled_y: f32 = @as(f32, @floatFromInt((height - 1) - y)) / @as(f32, @floatFromInt(height));
-            const ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
-            const pixel_color: ColorRGB = get_pixel_color(ray, scene, height, width, recursion_depth);
+            var pixel_color: ColorRGB = zmath.f32x4s(0);
+            for (0..samples_per_pixel) |_| {
+                const random_x: f32 = rng.random().float(f32);
+                const random_y: f32 = rng.random().float(f32);
+                const scaled_x: f32 = (@as(f32, @floatFromInt(x)) + random_x - 0.5) / @as(f32, @floatFromInt(width - 1));
+                const scaled_y: f32 = (@as(f32, @floatFromInt((height - 1) - y)) + random_y - 0.5) / @as(f32, @floatFromInt(height - 1));
+                const jittered_ray: Ray = scene.camera.createRay(scaled_x, scaled_y);
+                pixel_color += get_pixel_color(jittered_ray, scene, height, width, recursion_depth);
+            }
+            pixel_color /= @as(Vec3, @splat(@as(f32, @floatFromInt( samples_per_pixel))));
             pixels[x + y * width] = .{
                 .r = @as(u8, @intFromFloat(pixel_color[0])),
                 .g = @as(u8, @intFromFloat(pixel_color[1])),
